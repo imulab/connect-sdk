@@ -55,6 +55,11 @@ interface AccessTokenRepository {
      * Delete the token
      */
     suspend fun delete(token: String)
+
+    /**
+     * Delete the token associated with certain request
+     */
+    suspend fun deleteByRequestId(requestId: String)
 }
 
 /**
@@ -76,15 +81,16 @@ class AccessTokenHelper(
         response.setAccessToken(token)
         return runBlocking {
             launch(Dispatchers.IO) {
+                request.session.savedByRequestId = request.id
                 repository.save(token, request.session)
             }
         }
     }
 
-    suspend fun deleteToken(token: String): Job {
+    suspend fun deleteByRequestId(requestId: String): Job {
         return runBlocking {
             launch(Dispatchers.IO) {
-                repository.delete(token)
+                repository.deleteByRequestId(requestId)
             }
         }
     }

@@ -1,10 +1,7 @@
 package io.imulab.connect
 
 import io.imulab.connect.client.SigningAlgorithm
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import org.jose4j.jca.ProviderContext
 import org.jose4j.jws.HmacUsingShaAlgorithm
 import java.nio.charset.StandardCharsets
@@ -58,6 +55,11 @@ interface RefreshTokenRepository {
      * Delete the token
      */
     suspend fun delete(token: String)
+
+    /**
+     * Delete the token associated with certain request
+     */
+    suspend fun deleteByRequestId(requestId: String)
 }
 
 /**
@@ -73,15 +75,26 @@ class RefreshTokenHelper(
         response.setRefreshToken(token)
         return runBlocking {
             launch(Dispatchers.IO) {
+                request.session.savedByRequestId = request.id
                 repository.save(token, request.session)
             }
         }
     }
 
-    suspend fun deleteToken(token: String): Job {
+    suspend fun reviveSession(token: String): Session {
+        return runBlocking {
+            async(Dispatchers.IO) {
+                repository.getSession(token)
+            }
+        }.await().also {
+            strategy.validateToken(token, it)
+        }
+    }
+
+    suspend fun deleteByRequestId(requestId: String): Job {
         return runBlocking {
             launch(Dispatchers.IO) {
-                repository.delete(token)
+                repository.deleteByRequestId(requestId)
             }
         }
     }

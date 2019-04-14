@@ -75,6 +75,7 @@ class AuthorizeCodeHelper(
         response.setCode(code)
         return runBlocking {
             launch(Dispatchers.IO) {
+                request.session.savedByRequestId = request.id
                 repository.save(code, request.session)
             }
         }
