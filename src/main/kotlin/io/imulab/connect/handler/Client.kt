@@ -6,6 +6,9 @@ import io.imulab.connect.client.GrantType
 import io.imulab.connect.client.mustAcceptAllScopes
 import io.imulab.connect.client.mustAcceptGrantType
 
+/**
+ * Handler responsible for client credentials flow.
+ */
 class ClientCredentialsFlowHandler(
     private val accessTokenHelper: AccessTokenHelper,
     private val refreshTokenHelper: RefreshTokenHelper

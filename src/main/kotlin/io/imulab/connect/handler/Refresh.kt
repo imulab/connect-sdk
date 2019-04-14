@@ -4,6 +4,9 @@ import io.imulab.connect.*
 import io.imulab.connect.client.GrantType
 import io.imulab.connect.client.mustAcceptGrantType
 
+/**
+ * Handler responsible for refresh flow.
+ */
 class RefreshFlowHandler(
     private val accessTokenHelper: AccessTokenHelper,
     private val refreshTokenHelper: RefreshTokenHelper,

@@ -172,6 +172,11 @@ interface TokenRequest : Request {
      * The refresh token, if grant_type=refresh_token
      */
     val refreshToken: String
+
+    /**
+     * Merge with another [TokenRequest]. Replace value only when self is empty or nil and [other] is not.
+     */
+    fun mergeWith(other: TokenRequest)
 }
 
 /**
@@ -429,6 +434,37 @@ class ConnectTokenRequest(
         get() = _rawValues ?: notSet()
 
     private fun notSet(): Nothing = throw RuntimeException("value is not set")
+
+    private fun TokenRequest.tryClient(): Client? = try {
+        this.client
+    } catch (t: Throwable) {
+        null
+    }
+
+    private fun TokenRequest.tryRawValues(): Map<String, String>? = try {
+        this.rawValues
+    } catch (t: Throwable) {
+        null
+    }
+
+    override fun mergeWith(other: TokenRequest) {
+        if (id.isEmpty() && other.id.isNotEmpty())
+            id = other.id
+        if (_client == null && other.tryClient() != null)
+            _client = other.tryClient()
+        if (redirectUri.isEmpty() && other.redirectUri.isNotEmpty())
+            redirectUri = other.redirectUri
+        if (scopes.isEmpty() && other.scopes.isNotEmpty())
+            scopes.addAll(other.scopes)
+        if (_rawValues.isNullOrEmpty() && !other.tryRawValues().isNullOrEmpty())
+            _rawValues = other.tryRawValues()
+        if (grantTypes.isEmpty() && other.grantTypes.isNotEmpty())
+            grantTypes.addAll(other.grantTypes)
+        if (code.isEmpty() && other.code.isNotEmpty())
+            code = other.code
+        if (refreshToken.isEmpty() && other.refreshToken.isNotEmpty())
+            refreshToken = other.refreshToken
+    }
 }
 
 /**

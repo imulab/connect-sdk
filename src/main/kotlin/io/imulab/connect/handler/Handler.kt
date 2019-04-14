@@ -1,6 +1,7 @@
 package io.imulab.connect.handler
 
 import io.imulab.connect.AuthorizeRequest
+import io.imulab.connect.Errors
 import io.imulab.connect.Response
 import io.imulab.connect.TokenRequest
 
@@ -38,4 +39,23 @@ interface TokenHandler {
      * Returns true if this handler can handle the request.
      */
     fun supports(request: TokenRequest): Boolean
+}
+
+/**
+ * Entry point for handling any type of flows.
+ */
+class ConnectHandler(
+    private val authorizeHandlers: List<AuthorizeHandler>,
+    private val tokenHandlers: List<TokenHandler>
+) {
+    suspend fun handleAuthorizeRequest(request: AuthorizeRequest, response: Response) {
+        authorizeHandlers.forEach { it.authorize(request, response) }
+        if (!request.hasAllResponseTypesBeenHandled())
+            throw Errors.serverError("unable to handle all response types")
+    }
+
+    suspend fun handleTokenRequest(request: TokenRequest, response: Response) {
+        tokenHandlers.forEach { it.updateSession(request) }
+        tokenHandlers.forEach { it.issueToken(request, response) }
+    }
 }

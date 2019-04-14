@@ -7,6 +7,9 @@ import io.imulab.connect.client.mustAcceptGrantType
 import io.imulab.connect.client.mustAcceptResponseType
 import kotlinx.coroutines.Job
 
+/**
+ * Handler responsible for hybrid flow.
+ */
 class HybridFlowHandler(
     private val authorizeCodeFlowHandler: AuthorizeCodeFlowHandler,
     private val authorizeCodeHelper: AuthorizeCodeHelper,

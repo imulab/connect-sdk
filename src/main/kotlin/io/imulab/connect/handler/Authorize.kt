@@ -1,8 +1,10 @@
 package io.imulab.connect.handler
 
 import io.imulab.connect.*
-import io.imulab.connect.client.*
-import java.lang.RuntimeException
+import io.imulab.connect.client.GrantType
+import io.imulab.connect.client.ResponseType
+import io.imulab.connect.client.mustAcceptGrantType
+import io.imulab.connect.client.mustAcceptResponseType
 
 /**
  * Handler responsible for authorization code flow.
