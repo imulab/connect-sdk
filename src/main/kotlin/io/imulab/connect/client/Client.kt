@@ -13,49 +13,49 @@ interface Client {
     /**
      * Returns identifier of the client. The identifier needs to be globally unique.
      */
-    fun id(): String
+    val id: String
 
     /**
      * Returns the name of the client. Implementations are encouraged to assign a default
      * name to client if none is provided by the user. However, an empty string is permitted.
      */
-    fun name(): String
+    val name: String
 
     /**
      * Returns the type of the client. Defaults to [ClientType.CONFIDENTIAL] if user didn't
      * explicitly specify.
      */
-    fun type(): ClientType
+    val type: ClientType
 
     /**
      * Returns the registered redirect uris. Client must register at least one redirect uri.
      */
-    fun redirectUris(): Set<String>
+    val redirectUris: Set<String>
 
     /**
      * Returns the registered response types. This will be affected by the supported_response_types
      * option defined in Open ID Connect 1.0 Discovery configuration.
      */
-    fun responseTypes(): Set<ResponseType>
+    val responseTypes: Set<ResponseType>
 
     /**
      * Returns the registered grant types. This will be affected by the supported_grant_types
      * option defined in Open ID Connect 1.0 Discovery configuration.
      */
-    fun grantTypes(): Set<GrantType>
+    val grantTypes: Set<GrantType>
 
     /**
      * Returns the registered scopes. Requests made by the client must provide scopes that is acceptable
      * by the list of scopes registered here in order to be processed. However, the notion of acceptable
      * is not limited to string equality comparison, and is subject to implementation.
      */
-    fun scopes(): Set<String>
+    val scopes: Set<String>
 
     /**
      * Returns the application type of the client. The value defaults to [ApplicationType.WEB] if client
      * didn't explicitly register a value.
      */
-    fun applicationType(): ApplicationType
+    val applicationType: ApplicationType
 
     /**
      * Returns the registered list of email contacts.
@@ -64,34 +64,34 @@ interface Client {
      * ease of use of the API, we are using [List] here. This is usually not a huge issue as this field
      * is informational only.
      */
-    fun contacts(): List<String>
+    val contacts: List<String>
 
     /**
      * Returns the logo uri of the client. An empty string indicates no uri registered.
      */
-    fun logoUri(): String
+    val logoUri: String
 
     /**
      * Returns the client uri. An empty string indicates no uri registered.
      */
-    fun clientUri(): String
+    val clientUri: String
 
     /**
      * Returns the policy uri of the client. An empty string indicates no uri registered.
      */
-    fun policyUri(): String
+    val policyUri: String
 
     /**
      * Returns the terms of service uri of the client. An empty string indicates no uri registered.
      */
-    fun tosUri(): String
+    val tosUri: String
 
     /**
      * Returns the json web key set uri of the client. An empty string indicates no uri registered.
      *
      * This field is mutually exclusive with [jwks]. Only one of [jwks] or [jwksUri] may be provided.
      */
-    fun jwksUri(): String
+    val jwksUri: String
 
     /**
      * Returns the raw json web key set value registered by the client. An empty string indicates client
@@ -99,27 +99,27 @@ interface Client {
      *
      * This field is mutually exclusive with [jwksUri]. Only one of [jwks] or [jwksUri] may be provided.
      */
-    fun jwks(): String
+    val jwks: String
 
     /**
      * Returns the sector identifier uri of the client. Only URL with HTTPS scheme is acceptable.
      * This uri is used to validate [redirectUris] and conduct pairwise pseudonymous subject value
      * calculation. An empty string indicates no uri was registered.
      */
-    fun sectorIdentifierUri(): String
+    val sectorIdentifierUri: String
 
     /**
      * Returns the subject type of the user. This value is used to determine the algorithm during the
      * pseudonymous subject value calculation. The value defaults to [SubjectType.PUBLIC] is user did
      * not explicitly register.
      */
-    fun subjectType(): SubjectType
+    val subjectType: SubjectType
 
     /**
      * Returns the JWS algorithm used to sign the id_token response. The value should default to
      * [SigningAlgorithm.RS256] if user did not explicitly specify.
      */
-    fun idTokenSignedResponseAlgorithm(): SigningAlgorithm
+    val idTokenSignedResponseAlgorithm: SigningAlgorithm
 
     /**
      * Returns the JWS algorithm to negotiate the encryption key for JWE. The value should default to
@@ -129,7 +129,7 @@ interface Client {
      * equal to [EncryptionAlgorithm.NONE], the value of [idTokenEncryptedResponseEncoding] cannot equal
      * to [EncryptionEncoding.NONE] either.
      */
-    fun idTokenEncryptedResponseAlgorithm(): EncryptionAlgorithm
+    val idTokenEncryptedResponseAlgorithm: EncryptionAlgorithm
 
     /**
      * Returns the JWS algorithm to encode the content for JWE. The value should default to
@@ -139,13 +139,13 @@ interface Client {
      * equal to [EncryptionEncoding.NONE], the value of [idTokenEncryptedResponseAlgorithm] cannot equal
      *  to [EncryptionAlgorithm.NONE] either.
      */
-    fun idTokenEncryptedResponseEncoding(): EncryptionEncoding
+    val idTokenEncryptedResponseEncoding: EncryptionEncoding
 
     /**
      * Returns the JWS algorithm client will use to sign the request object. The value should default to
      * [SigningAlgorithm.RS256] if user did not explicitly specify.
      */
-    fun requestObjectSigningAlgorithm(): SigningAlgorithm
+    val requestObjectSigningAlgorithm: SigningAlgorithm
 
     /**
      * Returns the JWS algorithm client uses to negotiate the encryption key for JWE request object. If not
@@ -155,7 +155,7 @@ interface Client {
      * equal to [EncryptionAlgorithm.NONE], the value of [requestObjectEncryptionEncoding] cannot equal
      * to [EncryptionEncoding.NONE] either.
      */
-    fun requestObjectEncryptionAlgorithm(): EncryptionAlgorithm
+    val requestObjectEncryptionAlgorithm: EncryptionAlgorithm
 
     /**
      * Returns the JWS algorithm client uses to encode the content for JWE request object. If not specified,
@@ -165,13 +165,13 @@ interface Client {
      * equal to [EncryptionEncoding.NONE], the value of [requestObjectEncryptionAlgorithm] cannot equal
      * to [EncryptionAlgorithm.NONE] either.
      */
-    fun requestObjectEncryptionEncoding(): EncryptionEncoding
+    val requestObjectEncryptionEncoding: EncryptionEncoding
 
     /**
      * Returns the signing algorithm used to sign the user info endpoint response. If not specified, should default
      * to [SigningAlgorithm.NONE], which means the endpoint will return content in application/json format.
      */
-    fun userInfoSignedResponseAlgorithm(): SigningAlgorithm
+    val userInfoSignedResponseAlgorithm: SigningAlgorithm
 
     /**
      * Returns the JWS algorithm to negotiate the encryption key for the JWE user info response. If not specified,
@@ -181,7 +181,7 @@ interface Client {
      * equal to [EncryptionAlgorithm.NONE], the value of [userInfoEncryptedResponseEncoding] cannot equal
      * to [EncryptionEncoding.NONE] either.
      */
-    fun userInfoEncryptedResponseAlgorithm(): EncryptionAlgorithm
+    val userInfoEncryptedResponseAlgorithm: EncryptionAlgorithm
 
     /**
      * Returns the JWS algorithm to encode the JWE user info response content. If not specified, should default to
@@ -191,13 +191,13 @@ interface Client {
      * equal to [EncryptionEncoding.NONE], the value of [userInfoEncryptedResponseAlgorithm] cannot equal
      * to [EncryptionAlgorithm.NONE] either.
      */
-    fun userInfoEncryptedResponseEncoding(): EncryptionEncoding
+    val userInfoEncryptedResponseEncoding: EncryptionEncoding
 
     /**
      * Returns the authentication method employed by the token endpoint. If not specified, defaults to
      * [AuthenticationMethod.BASIC].
      */
-    fun tokenEndpointAuthMethod(): AuthenticationMethod
+    val tokenEndpointAuthMethod: AuthenticationMethod
 
     /**
      * Returns the algorithm used to sign the authentication JWT used at the token endpoint. This value is only used
@@ -207,7 +207,7 @@ interface Client {
      * [AuthenticationMethod.NONE], this value can default to [SigningAlgorithm.NONE]. Otherwise, client must specify
      * a not-[SigningAlgorithm.NONE] value for this field.
      */
-    fun tokenEndpointAuthSigningAlgorithm(): SigningAlgorithm
+    val tokenEndpointAuthSigningAlgorithm: SigningAlgorithm
 
     /**
      * Returns the default max age specified by the client. If this value is greater than zero, user authentication
@@ -217,24 +217,24 @@ interface Client {
      * However, since unsigned long is still experimental in Kotlin at the time of writing. We will just use long as
      * its data type and do extra validation.
      */
-    fun defaultMaxAge(): Long
+    val defaultMaxAge: Long
 
     /**
      * Returns whether auth_time claim is required.
      */
-    fun requireAuthTime(): Boolean
+    val requireAuthTime: Boolean
 
     /**
      * Returns a list of default authentication class reference values.
      */
-    fun defaultAcrValues(): List<String>
+    val defaultAcrValues: List<String>
 
     /**
      * Returns a list of uris, each pointing to a file that contains a request object. Upon client registration, server
      * can read from these uris and cache its content. Each uri can optionally contain a fragment calculated by hashing
      * the content with SHA-256. If such fragment is present, server will also perform hash checks on the data received.
      */
-    fun requestUris(): Set<String>
+    val requestUris: Set<String>
 }
 
 /**
@@ -247,7 +247,7 @@ interface ClientSecretAware {
     /**
      * Returns client secret in the form of choice (e.g. plain text, hashed, or encrypted)
      */
-    fun secret(): String
+    val secret: String
 }
 
 /**
@@ -261,7 +261,7 @@ interface JwksCacheAware {
     /**
      * Returns the json web key set cached by the client.
      */
-    fun jwksCache(): String
+    val jwksCache: String
 }
 
 /**
@@ -361,39 +361,81 @@ enum class AuthenticationMethod(val value: String) {
  */
 open class NothingClient : Client, ClientSecretAware, JwksCacheAware, RequestCacheAware {
     private fun nothing(): Nothing = throw NotImplementedError("nothing client implements nothing.")
-    override fun id(): String = nothing()
-    override fun name(): String = nothing()
-    override fun type(): ClientType = nothing()
-    override fun redirectUris(): Set<String> = nothing()
-    override fun responseTypes(): Set<ResponseType> = nothing()
-    override fun grantTypes(): Set<GrantType> = nothing()
-    override fun scopes(): Set<String> = nothing()
-    override fun applicationType(): ApplicationType = nothing()
-    override fun contacts(): List<String> = nothing()
-    override fun logoUri(): String = nothing()
-    override fun clientUri(): String = nothing()
-    override fun policyUri(): String = nothing()
-    override fun tosUri(): String = nothing()
-    override fun jwksUri(): String = nothing()
-    override fun jwks(): String = nothing()
-    override fun sectorIdentifierUri(): String = nothing()
-    override fun subjectType(): SubjectType = nothing()
-    override fun idTokenSignedResponseAlgorithm(): SigningAlgorithm = nothing()
-    override fun idTokenEncryptedResponseAlgorithm(): EncryptionAlgorithm = nothing()
-    override fun idTokenEncryptedResponseEncoding(): EncryptionEncoding = nothing()
-    override fun requestObjectSigningAlgorithm(): SigningAlgorithm = nothing()
-    override fun requestObjectEncryptionAlgorithm(): EncryptionAlgorithm = nothing()
-    override fun requestObjectEncryptionEncoding(): EncryptionEncoding = nothing()
-    override fun userInfoSignedResponseAlgorithm(): SigningAlgorithm = nothing()
-    override fun userInfoEncryptedResponseAlgorithm(): EncryptionAlgorithm = nothing()
-    override fun userInfoEncryptedResponseEncoding(): EncryptionEncoding = nothing()
-    override fun tokenEndpointAuthMethod(): AuthenticationMethod = nothing()
-    override fun tokenEndpointAuthSigningAlgorithm(): SigningAlgorithm = nothing()
-    override fun defaultMaxAge(): Long = nothing()
-    override fun requireAuthTime(): Boolean = nothing()
-    override fun defaultAcrValues(): List<String> = nothing()
-    override fun requestUris(): Set<String> = nothing()
-    override fun secret(): String = nothing()
-    override fun jwksCache(): String = nothing()
+    override val id: String
+        get() = nothing()
+    override val name: String
+        get() = nothing()
+    override val type: ClientType
+        get() = nothing()
+    override val redirectUris: Set<String>
+        get() = nothing()
+    override val responseTypes: Set<ResponseType>
+        get() = nothing()
+    override val grantTypes: Set<GrantType>
+        get() = nothing()
+    override val scopes: Set<String>
+        get() = nothing()
+    override val applicationType: ApplicationType
+        get() = nothing()
+    override val contacts: List<String>
+        get() = nothing()
+    override val logoUri: String
+        get() = nothing()
+    override val clientUri: String
+        get() = nothing()
+    override val policyUri: String
+        get() = nothing()
+    override val tosUri: String
+        get() = nothing()
+    override val jwksUri: String
+        get() = nothing()
+    override val jwks: String
+        get() = nothing()
+    override val sectorIdentifierUri: String
+        get() = nothing()
+    override val subjectType: SubjectType
+        get() = nothing()
+    override val idTokenSignedResponseAlgorithm: SigningAlgorithm
+        get() = nothing()
+    override val idTokenEncryptedResponseAlgorithm: EncryptionAlgorithm
+        get() = nothing()
+    override val idTokenEncryptedResponseEncoding: EncryptionEncoding
+        get() = nothing()
+    override val requestObjectSigningAlgorithm: SigningAlgorithm
+        get() = nothing()
+    override val requestObjectEncryptionAlgorithm: EncryptionAlgorithm
+        get() = nothing()
+    override val requestObjectEncryptionEncoding: EncryptionEncoding
+        get() = nothing()
+    override val userInfoSignedResponseAlgorithm: SigningAlgorithm
+        get() = nothing()
+    override val userInfoEncryptedResponseAlgorithm: EncryptionAlgorithm
+        get() = nothing()
+    override val userInfoEncryptedResponseEncoding: EncryptionEncoding
+        get() = nothing()
+    override val tokenEndpointAuthMethod: AuthenticationMethod
+        get() = nothing()
+    override val tokenEndpointAuthSigningAlgorithm: SigningAlgorithm
+        get() = nothing()
+    override val defaultMaxAge: Long
+        get() = nothing()
+    override val requireAuthTime: Boolean
+        get() = nothing()
+    override val defaultAcrValues: List<String>
+        get() = nothing()
+    override val requestUris: Set<String>
+        get() = nothing()
+    override val secret: String
+        get() = nothing()
+    override val jwksCache: String
+        get() = nothing()
+
     override fun uriForRequestCache(requestUri: String): String = nothing()
 }
+
+/**
+ * A [Client] implementation which only has client_id available. This implementation is helpful
+ * to be used as a placeholder when we received client_id data in request, but has not resolved
+ * the client yet.
+ */
+class IdOnlyClient(override val id: String): NothingClient()

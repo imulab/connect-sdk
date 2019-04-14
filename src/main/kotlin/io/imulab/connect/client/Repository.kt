@@ -17,7 +17,7 @@ interface ClientLookup {
  */
 class MemoryClientLookup(private val clients: Map<String, Client> = emptyMap()): ClientLookup {
 
-    constructor(vararg clients: Client): this(clients.associateBy { it.id() })
+    constructor(vararg clients: Client): this(clients.associateBy { it.id })
 
     override suspend fun findById(id: String): Client {
         return clients.getOrElse(id, defaultValue = {

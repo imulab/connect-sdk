@@ -6,7 +6,7 @@ import io.imulab.connect.Errors
  * Utility method to test if [responseType] is registered by client
  */
 fun Client.acceptsResponseType(responseType: ResponseType): Boolean =
-    this.responseTypes().contains(responseType)
+    this.responseTypes.contains(responseType)
 
 /**
  * Utility method to force test if [responseType] is registered by client. If not, an exception is thrown.
@@ -20,7 +20,7 @@ fun Client.mustAcceptResponseType(responseType: ResponseType) {
  * Utility method to test if [grantType] is registered by client.
  */
 fun Client.acceptsGrantType(grantType: GrantType): Boolean =
-    this.grantTypes().contains(grantType)
+    this.grantTypes.contains(grantType)
 
 /**
  * Utility method to force test if [grantType] is registered by client. If not, an exception is thrown.
@@ -38,7 +38,7 @@ fun Client.acceptsScope(
     scope: String,
     comparator: (registered: String, supplied: String) -> Boolean = { r, s -> r == s }
 ): Boolean {
-    return this.scopes().any { comparator(it, scope) }
+    return this.scopes.any { comparator(it, scope) }
 }
 
 /**
