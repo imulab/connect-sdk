@@ -1,4 +1,4 @@
 package io.imulab.connect
 
-inline fun <reified T> Collection<T>.containsExactly(element: T): Boolean =
-    this.size == 1 && this.contains(element)
+inline fun <reified T> Collection<T>.containsExactly(vararg elements: T): Boolean =
+    this.size == elements.size && this.containsAll(elements.toSet())

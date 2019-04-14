@@ -21,7 +21,6 @@ class AuthorizeFlowHandler(
         try {
             request.client.apply {
                 mustAcceptResponseType(ResponseType.CODE)
-                mustAcceptAllScopes(request.scopes)
             }
 
             authorizeCodeHelper.issueCode(request, response).join()
@@ -31,7 +30,7 @@ class AuthorizeFlowHandler(
     }
 
     override fun supports(request: AuthorizeRequest): Boolean {
-        return request.responseTypes.contains(ResponseType.CODE)
+        return request.responseTypes.containsExactly(ResponseType.CODE)
     }
 
     override suspend fun updateSession(request: TokenRequest) {
