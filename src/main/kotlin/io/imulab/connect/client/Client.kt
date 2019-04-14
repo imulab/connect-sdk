@@ -248,6 +248,11 @@ interface ClientSecretAware {
      * Returns client secret in the form of choice (e.g. plain text, hashed, or encrypted)
      */
     val secret: String
+
+    /**
+     * Convert [secret] to plain text, used for symmetric signing keys. Default to [secret] itself.
+     */
+    fun plainTextSecret(): String = secret
 }
 
 /**

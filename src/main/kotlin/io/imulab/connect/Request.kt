@@ -189,6 +189,11 @@ interface Session {
     var obfuscatedSubject: String
 
     /**
+     * Id of the client that started the session.
+     */
+    var clientId: String
+
+    /**
      * The determined redirect_uri to be used for this request. This is not necessarily the same with
      * requested redirect_uri.
      */
@@ -417,6 +422,7 @@ class ConnectTokenRequest(
 class ConnectSession(
     override var subject: String = "",
     override var obfuscatedSubject: String = "",
+    override var clientId: String = "",
     override var finalRedirectUri: String = "",
     override var liveAuthorizationCode: String = "",
     override var liveAccessToken: String = "",
@@ -434,6 +440,8 @@ class ConnectSession(
             this.subject = other.subject
         if (other.obfuscatedSubject.isNotEmpty())
             this.obfuscatedSubject = other.obfuscatedSubject
+        if (other.clientId.isNotEmpty())
+            this.clientId = other.clientId
         if (other.finalRedirectUri.isNotEmpty())
             this.finalRedirectUri = other.finalRedirectUri
         if (other.liveAuthorizationCode.isNotEmpty())

@@ -58,6 +58,22 @@ object Errors {
         statusCode = 400
     )
 
+    fun invalidGrant(reason: String): ConnectException {
+        return ConnectException(
+            error = Codes.invalidGrant,
+            description = reason,
+            statusCode = 400
+        )
+    }
+
+    fun serverError(reason: String): ConnectException {
+        return ConnectException(
+            error = Codes.serverError,
+            description = reason,
+            statusCode = 500
+        )
+    }
+
     object Codes {
         const val invalidRequest = "invalid_request"
         const val invalidClient = "invalid_client"

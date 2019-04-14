@@ -1,6 +1,8 @@
 package io.imulab.connect.client
 
 import io.imulab.connect.Errors
+import org.jose4j.jwk.HttpsJwks
+import org.jose4j.jwk.JsonWebKeySet
 
 /**
  * Utility method to test if [responseType] is registered by client
@@ -61,4 +63,24 @@ fun Client.mustAcceptAllScopes(
 ) {
     if (!this.acceptsAllScopes(scopes, comparator))
         throw Errors.invalidScope()
+}
+
+/**
+ * Utility method to determine whether id token requires encryption.
+ */
+fun Client.requireIdTokenEncryption(): Boolean =
+    this.idTokenEncryptedResponseAlgorithm != EncryptionAlgorithm.NONE &&
+        this.idTokenEncryptedResponseEncoding != EncryptionEncoding.NONE
+
+/**
+ * Utility method to fetch and/or parse json web key set.
+ */
+fun Client.resolveJwks(): JsonWebKeySet {
+    if (this is JwksCacheAware)
+        return JsonWebKeySet(this.jwksCache)
+
+    if (this.jwks.isNotEmpty())
+        return JsonWebKeySet(this.jwks)
+
+    return JsonWebKeySet(HttpsJwks(this.jwksUri).jsonWebKeys)
 }

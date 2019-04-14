@@ -21,6 +21,8 @@ dependencies {
 
     implementation("org.bitbucket.b_c:jose4j:0.6.5")
 
+    implementation("com.squareup.okhttp3:okhttp:3.14.1")
+
     // Use the Kotlin test library.
     testImplementation("org.jetbrains.kotlin:kotlin-test")
 
