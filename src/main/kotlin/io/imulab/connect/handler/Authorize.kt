@@ -7,7 +7,7 @@ import java.lang.RuntimeException
 /**
  * Handler responsible for authorization code flow.
  */
-class AuthorizeFlowHandler(
+class AuthorizeCodeFlowHandler(
     private val authorizeCodeHelper: AuthorizeCodeHelper,
     private val accessTokenHelper: AccessTokenHelper,
     private val refreshTokenHelper: RefreshTokenHelper,
