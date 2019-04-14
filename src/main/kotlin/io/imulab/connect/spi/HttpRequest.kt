@@ -1,7 +1,7 @@
 package io.imulab.connect.spi
 
 /**
- * Service provider interface for an http request.
+ * Service provider interface for an http request. Operation on this object should be idempotent.
  */
 interface HttpRequest {
 

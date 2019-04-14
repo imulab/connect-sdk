@@ -58,6 +58,13 @@ object Errors {
         statusCode = 400
     )
 
+    fun clientForbidden(reason: String, headers: Map<String, String> = emptyMap()): ConnectException = ConnectException(
+        error = Codes.invalidClient,
+        description = reason,
+        statusCode = 401,
+        headers = headers
+    )
+
     fun invalidGrant(reason: String): ConnectException {
         return ConnectException(
             error = Codes.invalidGrant,
