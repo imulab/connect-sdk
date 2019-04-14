@@ -248,6 +248,16 @@ interface Session {
      * Replace this session with the [other] session. Keep existing values if the values from [other] is nil or empty.
      */
     fun replacedWith(other: Session)
+
+    /**
+     * Convenience method to test if refresh token should be generated
+     */
+    fun authorizedRefreshToken(): Boolean = grantedScopes.contains(offlineAccess)
+
+    /**
+     * Convenience method to test if id token should be generated
+     */
+    fun authorizeIdToken(): Boolean = grantedScopes.contains(openId)
 }
 
 /**

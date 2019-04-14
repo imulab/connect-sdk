@@ -1,6 +1,10 @@
 package io.imulab.connect
 
 import io.imulab.connect.client.SigningAlgorithm
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.jose4j.jca.ProviderContext
 import org.jose4j.jws.HmacUsingShaAlgorithm
 import java.nio.charset.StandardCharsets
@@ -8,6 +12,11 @@ import java.security.Key
 import java.security.MessageDigest
 import java.util.*
 import java.util.concurrent.ThreadLocalRandom
+
+/**
+ * Standard scope to grant refresh token
+ */
+const val offlineAccess = "offline_access"
 
 /**
  * Refresh token related algorithms.
@@ -49,6 +58,33 @@ interface RefreshTokenRepository {
      * Delete the token
      */
     suspend fun delete(token: String)
+}
+
+/**
+ * Helper to combine operations of [RefreshTokenStrategy] and [RefreshTokenRepository] to allow
+ * asynchronous operations where IO bound tasks are executed on IO threads.
+ */
+class RefreshTokenHelper(
+    private val strategy: RefreshTokenStrategy,
+    private val repository: RefreshTokenRepository
+) {
+    suspend fun issueToken(request: TokenRequest, response: Response): Job {
+        val token = strategy.newToken(request)
+        response.setRefreshToken(token)
+        return runBlocking {
+            launch(Dispatchers.IO) {
+                repository.save(token, request.session)
+            }
+        }
+    }
+
+    suspend fun deleteToken(token: String): Job {
+        return runBlocking {
+            launch(Dispatchers.IO) {
+                repository.delete(token)
+            }
+        }
+    }
 }
 
 /**

@@ -8,7 +8,14 @@ import org.jose4j.jws.JsonWebSignature
 import org.jose4j.jwt.JwtClaims
 import org.jose4j.keys.AesKey
 import java.nio.charset.StandardCharsets
+import java.security.MessageDigest
 import java.time.Duration
+import java.util.*
+
+/**
+ * Standard scope to allow generating id token.
+ */
+const val openId = "openid"
 
 /**
  * Id token related algorithm.
@@ -18,6 +25,63 @@ interface IdTokenStrategy {
      * Generate a new id token.
      */
     fun newToken(request: Request): String
+}
+
+/**
+ * Helper to assist create code hash and/or access token hash before generating the id token.
+ */
+class IdTokenHelper(
+    private val strategy: IdTokenStrategy
+) {
+    private val encoder = Base64.getEncoder().withoutPadding()
+
+    companion object {
+        const val c_hash = "c_hash"
+        const val at_hash = "at_hash"
+    }
+
+    fun issueToken(request: Request, response: Response) {
+        if (response.getCode().isNotEmpty()) {
+            request.session.idClaims[c_hash] = leftMostHash(
+                response.getCode(),
+                request.client.idTokenSignedResponseAlgorithm
+            )
+        }
+
+        if (response.getAccessToken().isNotEmpty()) {
+            request.session.idClaims[at_hash] = leftMostHash(
+                response.getAccessToken(),
+                request.client.idTokenSignedResponseAlgorithm
+            )
+        }
+
+        val token = strategy.newToken(request)
+        response.setIdToken(token)
+    }
+
+    private fun leftMostHash(raw: String, alg: SigningAlgorithm): String {
+        val sha = when (alg) {
+            SigningAlgorithm.HS256,
+            SigningAlgorithm.RS256,
+            SigningAlgorithm.ES256,
+            SigningAlgorithm.PS256 -> "SHA-256"
+            SigningAlgorithm.HS384,
+            SigningAlgorithm.RS384,
+            SigningAlgorithm.ES384,
+            SigningAlgorithm.PS384 -> "SHA-384"
+            SigningAlgorithm.HS512,
+            SigningAlgorithm.RS512,
+            SigningAlgorithm.ES512,
+            SigningAlgorithm.PS512 -> "SHA-512"
+            else -> ""
+        }
+
+        if (sha.isEmpty())
+            return ""
+
+        val hashed = MessageDigest.getInstance(sha).digest(raw.toByteArray(StandardCharsets.UTF_8))
+        return encoder.encodeToString(hashed.copyOfRange(0, hashed.size/2))
+    }
 }
 
 /**

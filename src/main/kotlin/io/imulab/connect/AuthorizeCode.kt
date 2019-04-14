@@ -1,6 +1,7 @@
 package io.imulab.connect
 
 import io.imulab.connect.client.SigningAlgorithm
+import kotlinx.coroutines.*
 import org.jose4j.jca.ProviderContext
 import org.jose4j.jws.HmacUsingShaAlgorithm
 import java.nio.charset.StandardCharsets
@@ -49,6 +50,43 @@ interface AuthorizeCodeRepository {
      * Delete the code
      */
     suspend fun delete(code: String)
+}
+
+/**
+ * Helper to combine operations of [AuthorizeCodeStrategy] and [AuthorizeCodeRepository] to allow
+ * asynchronous operations where IO bound tasks are executed on IO threads.
+ */
+class AuthorizeCodeHelper(
+    private val strategy: AuthorizeCodeStrategy,
+    private val repository: AuthorizeCodeRepository
+) {
+    suspend fun reviveSession(code: String): Session {
+        return runBlocking {
+            async(Dispatchers.IO) {
+                repository.getSession(code)
+            }
+        }.await().also {
+            strategy.validateCode(code, it)
+        }
+    }
+
+    suspend fun issueCode(request: AuthorizeRequest, response: Response): Job {
+        val code = strategy.newCode(request)
+        response.setCode(code)
+        return runBlocking {
+            launch(Dispatchers.IO) {
+                repository.save(code, request.session)
+            }
+        }
+    }
+
+    suspend fun deleteCode(code: String): Job {
+        return runBlocking {
+            launch(Dispatchers.IO) {
+                repository.delete(code)
+            }
+        }
+    }
 }
 
 /**

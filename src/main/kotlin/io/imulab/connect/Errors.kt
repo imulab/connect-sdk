@@ -32,13 +32,13 @@ object Errors {
 
     fun unsupportedGrantType(grantType: GrantType): ConnectException = ConnectException(
         error = Codes.unsupportedGrantType,
-        description = "grant_type ${grantType.value} is not supported.",
+        description = "grant_type ${grantType.value} is not supports.",
         statusCode = 400
     )
 
     fun unsupportedResponseType(responseType: ResponseType): ConnectException = ConnectException(
         error = Codes.unsupportedResponseType,
-        description = "response_type ${responseType.value} is not supported.",
+        description = "response_type ${responseType.value} is not supports.",
         statusCode = 400
     )
 

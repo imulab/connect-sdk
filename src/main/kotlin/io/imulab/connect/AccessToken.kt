@@ -1,6 +1,10 @@
 package io.imulab.connect
 
 import io.imulab.connect.client.SigningAlgorithm
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.jose4j.jwk.JsonWebKey
 import org.jose4j.jwk.JsonWebKeySet
 import org.jose4j.jwk.Use
@@ -51,6 +55,39 @@ interface AccessTokenRepository {
      * Delete the token
      */
     suspend fun delete(token: String)
+}
+
+/**
+ * Helper to combine operations of [AccessTokenStrategy] and [AccessTokenRepository] to allow
+ * asynchronous operations where IO bound tasks are executed on IO threads.
+ */
+class AccessTokenHelper(
+    private val lifespan: Duration,
+    private val strategy: AccessTokenStrategy,
+    private val repository: AccessTokenRepository
+) {
+    suspend fun issueToken(request: Request, response: Response): Job {
+        val token = strategy.newToken(request)
+        response.apply {
+            setAccessToken(token)
+            setTokenType()
+            setExpiresIn(lifespan.toMillis() / 1000)
+        }
+        response.setAccessToken(token)
+        return runBlocking {
+            launch(Dispatchers.IO) {
+                repository.save(token, request.session)
+            }
+        }
+    }
+
+    suspend fun deleteToken(token: String): Job {
+        return runBlocking {
+            launch(Dispatchers.IO) {
+                repository.delete(token)
+            }
+        }
+    }
 }
 
 /**
