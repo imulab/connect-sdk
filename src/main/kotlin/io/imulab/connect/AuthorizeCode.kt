@@ -61,7 +61,7 @@ class AuthorizeCodeHelper(
     private val repository: AuthorizeCodeRepository
 ) {
     suspend fun reviveSession(code: String): Session {
-        return runBlocking {
+        return coroutineScope {
             async(Dispatchers.IO) {
                 repository.getSession(code)
             }
@@ -73,7 +73,7 @@ class AuthorizeCodeHelper(
     suspend fun issueCode(request: AuthorizeRequest, response: Response): Job {
         val code = strategy.newCode(request)
         response.setCode(code)
-        return runBlocking {
+        return coroutineScope {
             launch(Dispatchers.IO) {
                 request.session.savedByRequestId = request.id
                 repository.save(code, request.session)
@@ -82,7 +82,7 @@ class AuthorizeCodeHelper(
     }
 
     suspend fun deleteCode(code: String): Job {
-        return runBlocking {
+        return coroutineScope {
             launch(Dispatchers.IO) {
                 repository.delete(code)
             }

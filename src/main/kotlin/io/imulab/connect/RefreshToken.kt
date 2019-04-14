@@ -73,7 +73,7 @@ class RefreshTokenHelper(
     suspend fun issueToken(request: TokenRequest, response: Response): Job {
         val token = strategy.newToken(request)
         response.setRefreshToken(token)
-        return runBlocking {
+        return coroutineScope {
             launch(Dispatchers.IO) {
                 request.session.savedByRequestId = request.id
                 repository.save(token, request.session)
@@ -82,7 +82,7 @@ class RefreshTokenHelper(
     }
 
     suspend fun reviveSession(token: String): Session {
-        return runBlocking {
+        return coroutineScope {
             async(Dispatchers.IO) {
                 repository.getSession(token)
             }
@@ -92,7 +92,7 @@ class RefreshTokenHelper(
     }
 
     suspend fun deleteByRequestId(requestId: String): Job {
-        return runBlocking {
+        return coroutineScope {
             launch(Dispatchers.IO) {
                 repository.deleteByRequestId(requestId)
             }

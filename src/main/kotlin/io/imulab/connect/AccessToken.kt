@@ -1,10 +1,7 @@
 package io.imulab.connect
 
 import io.imulab.connect.client.SigningAlgorithm
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import org.jose4j.jwk.JsonWebKey
 import org.jose4j.jwk.JsonWebKeySet
 import org.jose4j.jwk.Use
@@ -79,7 +76,7 @@ class AccessTokenHelper(
             setExpiresIn(lifespan.toMillis() / 1000)
         }
         response.setAccessToken(token)
-        return runBlocking {
+        return coroutineScope {
             launch(Dispatchers.IO) {
                 request.session.savedByRequestId = request.id
                 repository.save(token, request.session)
@@ -88,7 +85,7 @@ class AccessTokenHelper(
     }
 
     suspend fun deleteByRequestId(requestId: String): Job {
-        return runBlocking {
+        return coroutineScope {
             launch(Dispatchers.IO) {
                 repository.deleteByRequestId(requestId)
             }
