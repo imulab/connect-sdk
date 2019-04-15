@@ -115,7 +115,7 @@ interface AuthorizeRequest : Request {
      *
      * Given the dynamic nature of claims, it is modelled use string based maps.
      */
-    val claims: Map<String, Map<String, Map<String, Any>?>>
+    val claims: Map<String, Any>
 
     /**
      * The raw request parameter
@@ -148,10 +148,16 @@ interface AuthorizeRequest : Request {
     fun hasAllResponseTypesBeenHandled(): Boolean = responseTypes.all { isResponseTypeHandled(it) }
 
     /**
-     * Merge the [other] authorize request with this one. If [hard] is false, only replace when the specific field
-     * from the [other] authorize request is not nil or empty. If [hard] is true, replace everything.
+     * Merge the [other] authorize request with this one.
+     *
+     * When [hard] is true, values from this request will be forcefully replaced provided that values from [other] is
+     * not null or empty
+     *
+     * When [hard] is false, values from this request will only be replaced when they are null or empty.
+     *
+     * This method should not touch system generated values such as id, request time, session, etc.
      */
-    fun replaceWith(other: AuthorizeRequest, hard: Boolean = false)
+    fun mergeWith(other: AuthorizeRequest, hard: Boolean = true)
 }
 
 /**
@@ -176,7 +182,7 @@ interface TokenRequest : Request {
     /**
      * Merge with another [TokenRequest]. Replace value only when self is empty or nil and [other] is not.
      */
-    fun mergeWith(other: TokenRequest)
+    fun mergeWith(other: TokenRequest, hard: Boolean = true)
 }
 
 /**
@@ -276,11 +282,11 @@ interface Session {
 class ConnectAuthorizeRequest(
     override var id: String = UUID.randomUUID().toString(),
     override var requestedAt: LocalDateTime = LocalDateTime.now(),
-    private var _client: Client? = null,
+    var _client: Client? = null,
     override var redirectUri: String = "",
     override val scopes: MutableSet<String> = mutableSetOf(),
     override var session: Session = ConnectSession(),
-    private var _rawValues: Map<String, String>? = null,
+    var _rawValues: Map<String, String>? = null,
     override val responseTypes: MutableSet<ResponseType> = mutableSetOf(),
     override var state: String = "",
     var _responseMode: ResponseMode? = null,
@@ -293,7 +299,7 @@ class ConnectAuthorizeRequest(
     override var loginHint: String = "",
     override val acrValues: MutableList<String> = mutableListOf(),
     override val claimsLocales: MutableList<String> = mutableListOf(),
-    override var claims: Map<String, Map<String, Map<String, Any>?>> = emptyMap(),
+    override var claims: MutableMap<String, Any> = mutableMapOf(),
     override var request: String = "",
     override var requestUri: String = "",
     override var registration: String = "",
@@ -341,64 +347,79 @@ class ConnectAuthorizeRequest(
         null
     }
 
-    override fun replaceWith(other: AuthorizeRequest, hard: Boolean) {
-        if (hard || other.id.isNotEmpty())
-            this.id = other.id
-        if (hard)
-            this.requestedAt = other.requestedAt
-        if (hard || other.tryClient() != null)
+    override fun mergeWith(other: AuthorizeRequest, hard: Boolean) {
+        if ((hard && other.tryClient() != null) || this._client == null)
             this._client = other.tryClient()
-        if (hard || other.redirectUri.isNotEmpty())
+
+        if ((hard && other.redirectUri.isNotEmpty()) || this.redirectUri.isEmpty())
             this.redirectUri = other.redirectUri
-        if (hard || other.scopes.isNotEmpty()) {
+
+        if ((hard && other.scopes.isNotEmpty()) || this.scopes.isEmpty()) {
             this.scopes.clear()
             this.scopes.addAll(other.scopes)
         }
-        if (hard)
-            this.session = other.session
-        if (hard || other.tryRawValues() != null)
+
+        if ((hard && other.tryRawValues() != null) || this._rawValues == null)
             this._rawValues = other.tryRawValues()
-        if (hard || other.responseTypes.isNotEmpty()) {
+
+        if ((hard && other.responseTypes.isNotEmpty()) || this.responseTypes.isEmpty()) {
             this.responseTypes.clear()
             this.responseTypes.addAll(other.responseTypes)
         }
-        if (hard || other.state.isNotEmpty())
+
+        if ((hard && other.state.isNotEmpty()) || this.state.isEmpty())
             this.state = other.state
-        if (hard || other.tryResponseMode() != null)
+
+        if ((hard && other.tryResponseMode() != null) || this._responseMode == null)
             this._responseMode = other.tryResponseMode()
-        if (hard || other.nonce.isNotEmpty())
+
+        if ((hard && other.nonce.isNotEmpty()) || this.nonce.isEmpty())
             this.nonce = other.nonce
-        if (hard || other.tryDisplay() != null)
+
+        if ((hard && other.tryDisplay() != null) || this._display == null)
             this._display = other.tryDisplay()
-        if (hard || other.prompt.isNotEmpty()) {
+
+        if ((hard && other.prompt.isNotEmpty()) || this.prompt.isEmpty()) {
             this.prompt.clear()
             this.prompt.addAll(other.prompt)
         }
-        if (hard || other.maxAge > 0)
+
+        if ((hard && other.maxAge > 0) || this.maxAge == 0L)
             this.maxAge = other.maxAge
-        if (hard || other.uiLocales.isNotEmpty()) {
+
+        if ((hard && other.uiLocales.isNotEmpty()) || this.uiLocales.isEmpty()) {
             this.uiLocales.clear()
             this.uiLocales.addAll(other.uiLocales)
         }
-        if (hard || other.idTokenHint.isNotEmpty())
+
+        if ((hard || other.idTokenHint.isNotEmpty()) || this.idTokenHint.isEmpty())
             this.idTokenHint = other.idTokenHint
-        if (hard || other.loginHint.isNotEmpty())
+
+        if ((hard || other.loginHint.isNotEmpty()) || this.loginHint.isEmpty())
             this.loginHint = other.loginHint
-        if (hard || other.acrValues.isNotEmpty()) {
+
+        if ((hard || other.acrValues.isNotEmpty()) || this.acrValues.isEmpty()) {
             this.acrValues.clear()
             this.acrValues.addAll(other.acrValues)
         }
-        if (hard || other.claimsLocales.isNotEmpty()) {
+
+        if ((hard || other.claimsLocales.isNotEmpty()) || this.claimsLocales.isEmpty()) {
             this.claimsLocales.clear()
             this.claimsLocales.addAll(other.claimsLocales)
         }
-        if (hard || other.claims.isNotEmpty())
-            this.claims = other.claims
-        if (hard || other.request.isNotEmpty())
+
+        if ((hard || other.claims.isNotEmpty()) || this.claims.isEmpty()) {
+            this.claims.clear()
+            this.claims.putAll(other.claims)
+        }
+
+        if ((hard || other.request.isNotEmpty()) || this.request.isEmpty())
             this.request = other.request
-        if (hard || other.requestUri.isNotEmpty())
+
+        if ((hard || other.requestUri.isNotEmpty()) || this.requestUri.isEmpty())
             this.requestUri = other.requestUri
-        if (hard || other.registration.isNotEmpty())
+
+        if ((hard || other.registration.isNotEmpty()) || this.registration.isEmpty())
             this.registration = other.registration
     }
 }
@@ -419,11 +440,11 @@ val DefaultAuthorizeRequestValues = ConnectAuthorizeRequest(
 class ConnectTokenRequest(
     override var id: String = UUID.randomUUID().toString(),
     override var requestedAt: LocalDateTime = LocalDateTime.now(),
-    private var _client: Client? = null,
+    var _client: Client? = null,
     override var redirectUri: String = "",
     override val scopes: MutableSet<String> = mutableSetOf(),
     override var session: Session = ConnectSession(),
-    private var _rawValues: Map<String, String>? = null,
+    var _rawValues: Map<String, String>? = null,
     override val grantTypes: MutableSet<GrantType> = mutableSetOf(),
     override var code: String = "",
     override var refreshToken: String = ""
@@ -447,22 +468,30 @@ class ConnectTokenRequest(
         null
     }
 
-    override fun mergeWith(other: TokenRequest) {
-        if (id.isEmpty() && other.id.isNotEmpty())
-            id = other.id
-        if (_client == null && other.tryClient() != null)
-            _client = other.tryClient()
-        if (redirectUri.isEmpty() && other.redirectUri.isNotEmpty())
-            redirectUri = other.redirectUri
-        if (scopes.isEmpty() && other.scopes.isNotEmpty())
-            scopes.addAll(other.scopes)
-        if (_rawValues.isNullOrEmpty() && !other.tryRawValues().isNullOrEmpty())
-            _rawValues = other.tryRawValues()
-        if (grantTypes.isEmpty() && other.grantTypes.isNotEmpty())
-            grantTypes.addAll(other.grantTypes)
-        if (code.isEmpty() && other.code.isNotEmpty())
+    override fun mergeWith(other: TokenRequest, hard: Boolean) {
+        if ((hard && other.tryClient() != null) || this._client == null)
+            this._client = other.tryClient()
+
+        if ((hard && other.redirectUri.isNotEmpty()) || this.redirectUri.isEmpty())
+            this.redirectUri = other.redirectUri
+
+        if ((hard && other.scopes.isNotEmpty()) || this.scopes.isEmpty()) {
+            this.scopes.clear()
+            this.scopes.addAll(other.scopes)
+        }
+
+        if ((hard && other.tryRawValues() != null) || this._rawValues == null)
+            this._rawValues = other.tryRawValues()
+
+        if ((hard && other.grantTypes.isNotEmpty()) || this.grantTypes.isEmpty()) {
+            this.grantTypes.clear()
+            this.grantTypes.addAll(other.grantTypes)
+        }
+
+        if ((hard && other.code.isNotEmpty()) || this.code.isEmpty())
             code = other.code
-        if (refreshToken.isEmpty() && other.refreshToken.isNotEmpty())
+
+        if ((hard && other.refreshToken.isNotEmpty()) || this.refreshToken.isEmpty())
             refreshToken = other.refreshToken
     }
 }
@@ -524,13 +553,31 @@ class ConnectSession(
 }
 
 enum class ResponseMode(val value: String) {
-    QUERY("query"), FRAGMENT("fragment")
+    QUERY("query"), FRAGMENT("fragment");
+
+    companion object {
+        @JvmStatic
+        fun parse(value: String): ResponseMode = values().find { it.value == value }
+            ?: throw IllegalArgumentException("$value is not a valid response mode.")
+    }
 }
 
 enum class Display(val value: String) {
-    PAGE("page"), POPUP("popup"), TOUCH("touch"), WAP("wap")
+    PAGE("page"), POPUP("popup"), TOUCH("touch"), WAP("wap");
+
+    companion object {
+        @JvmStatic
+        fun parse(value: String): Display = values().find { it.value == value }
+            ?: throw IllegalArgumentException("$value is not a valid display.")
+    }
 }
 
 enum class Prompt(val value: String) {
-    NONE("none"), LOGIN("login"), CONSENT("consent"), SELECT_ACCOUNT("select_account")
+    NONE("none"), LOGIN("login"), CONSENT("consent"), SELECT_ACCOUNT("select_account");
+
+    companion object {
+        @JvmStatic
+        fun parse(value: String): Prompt = values().find { it.value == value }
+            ?: throw IllegalArgumentException("$value is not a valid prompt.")
+    }
 }

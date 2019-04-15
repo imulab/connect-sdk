@@ -285,16 +285,28 @@ interface RequestCacheAware {
 }
 
 enum class ClientType(val value: String) {
-    PUBLIC("public"), CONFIDENTIAL("confidential")
+    PUBLIC("public"), CONFIDENTIAL("confidential");
 }
 
 enum class ResponseType(val value: String) {
-    CODE("code"), TOKEN("token"), ID_TOKEN("id_token")
+    CODE("code"), TOKEN("token"), ID_TOKEN("id_token");
+
+    companion object {
+        @JvmStatic
+        fun parse(value: String): ResponseType = values().find { it.value == value }
+            ?: throw IllegalArgumentException("$value is not a valid response type.")
+    }
 }
 
 enum class GrantType(val value: String) {
     CODE("authorization_code"), IMPLICIT("implicit"),
-    CLIENT("client_credentials"), PWD("password"), REFRESH("refresh_token")
+    CLIENT("client_credentials"), PWD("password"), REFRESH("refresh_token");
+
+    companion object {
+        @JvmStatic
+        fun parse(value: String): GrantType = values().find { it.value == value }
+            ?: throw IllegalArgumentException("$value is not a valid grant type.")
+    }
 }
 
 enum class ApplicationType(val value: String) {
@@ -305,41 +317,41 @@ enum class SubjectType(val value: String) {
     PUBLIC("public"), PAIRWISE("pairwise")
 }
 
-enum class SigningAlgorithm(val value: String) {
-    HS256(AlgorithmIdentifiers.HMAC_SHA256),
-    HS384(AlgorithmIdentifiers.HMAC_SHA384),
-    HS512(AlgorithmIdentifiers.HMAC_SHA512),
-    RS256(AlgorithmIdentifiers.RSA_USING_SHA256),
-    RS384(AlgorithmIdentifiers.RSA_USING_SHA384),
-    RS512(AlgorithmIdentifiers.RSA_USING_SHA384),
-    ES256(AlgorithmIdentifiers.ECDSA_USING_P256_CURVE_AND_SHA256),
-    ES384(AlgorithmIdentifiers.ECDSA_USING_P384_CURVE_AND_SHA384),
-    ES512(AlgorithmIdentifiers.ECDSA_USING_P521_CURVE_AND_SHA512),
-    PS256(AlgorithmIdentifiers.RSA_PSS_USING_SHA256),
-    PS384(AlgorithmIdentifiers.RSA_PSS_USING_SHA384),
-    PS512(AlgorithmIdentifiers.RSA_PSS_USING_SHA512),
-    NONE(AlgorithmIdentifiers.NONE)
+enum class SigningAlgorithm(val value: String, val symmetric: Boolean) {
+    HS256(AlgorithmIdentifiers.HMAC_SHA256, true),
+    HS384(AlgorithmIdentifiers.HMAC_SHA384, true),
+    HS512(AlgorithmIdentifiers.HMAC_SHA512, true),
+    RS256(AlgorithmIdentifiers.RSA_USING_SHA256, false),
+    RS384(AlgorithmIdentifiers.RSA_USING_SHA384, false),
+    RS512(AlgorithmIdentifiers.RSA_USING_SHA384, false),
+    ES256(AlgorithmIdentifiers.ECDSA_USING_P256_CURVE_AND_SHA256, false),
+    ES384(AlgorithmIdentifiers.ECDSA_USING_P384_CURVE_AND_SHA384, false),
+    ES512(AlgorithmIdentifiers.ECDSA_USING_P521_CURVE_AND_SHA512, false),
+    PS256(AlgorithmIdentifiers.RSA_PSS_USING_SHA256, false),
+    PS384(AlgorithmIdentifiers.RSA_PSS_USING_SHA384, false),
+    PS512(AlgorithmIdentifiers.RSA_PSS_USING_SHA512, false),
+    NONE(AlgorithmIdentifiers.NONE, false)
 }
 
-enum class EncryptionAlgorithm(val value: String) {
-    RSA1_5(KeyManagementAlgorithmIdentifiers.RSA1_5),
-    RSA_OAEP(KeyManagementAlgorithmIdentifiers.RSA_OAEP),
-    RSA_OAEP_256(KeyManagementAlgorithmIdentifiers.RSA_OAEP_256),
-    ECDH_ES(KeyManagementAlgorithmIdentifiers.ECDH_ES),
-    ECDH_ES_A128KW(KeyManagementAlgorithmIdentifiers.ECDH_ES_A128KW),
-    ECDH_ES_A192KW(KeyManagementAlgorithmIdentifiers.ECDH_ES_A192KW),
-    ECDH_ES_A256KW(KeyManagementAlgorithmIdentifiers.ECDH_ES_A256KW),
-    A128KW(KeyManagementAlgorithmIdentifiers.A128KW),
-    A192KW(KeyManagementAlgorithmIdentifiers.A192KW),
-    A256KW(KeyManagementAlgorithmIdentifiers.A256KW),
-    A128GCMKW(KeyManagementAlgorithmIdentifiers.A128GCMKW),
-    A192GCMKW(KeyManagementAlgorithmIdentifiers.A192GCMKW),
-    A256GCMKW(KeyManagementAlgorithmIdentifiers.A256GCMKW),
-    PBES2_HS256_A128KW(KeyManagementAlgorithmIdentifiers.PBES2_HS256_A128KW),
-    PBES2_HS384_A192KW(KeyManagementAlgorithmIdentifiers.PBES2_HS384_A192KW),
-    PBES2_HS512_A256KW(KeyManagementAlgorithmIdentifiers.PBES2_HS512_A256KW),
-    DIRECT(KeyManagementAlgorithmIdentifiers.DIRECT),
-    NONE("none")
+enum class EncryptionAlgorithm(val value: String, val symmetric: Boolean) {
+    RSA1_5(KeyManagementAlgorithmIdentifiers.RSA1_5, false),
+    RSA_OAEP(KeyManagementAlgorithmIdentifiers.RSA_OAEP, false),
+    RSA_OAEP_256(KeyManagementAlgorithmIdentifiers.RSA_OAEP_256, false),
+    ECDH_ES(KeyManagementAlgorithmIdentifiers.ECDH_ES, false),
+    ECDH_ES_A128KW(KeyManagementAlgorithmIdentifiers.ECDH_ES_A128KW, false),
+    ECDH_ES_A192KW(KeyManagementAlgorithmIdentifiers.ECDH_ES_A192KW, false),
+    ECDH_ES_A256KW(KeyManagementAlgorithmIdentifiers.ECDH_ES_A256KW, false),
+    A128KW(KeyManagementAlgorithmIdentifiers.A128KW, true),
+    A192KW(KeyManagementAlgorithmIdentifiers.A192KW, true),
+    A256KW(KeyManagementAlgorithmIdentifiers.A256KW, true),
+    A128GCMKW(KeyManagementAlgorithmIdentifiers.A128GCMKW, true),
+    A192GCMKW(KeyManagementAlgorithmIdentifiers.A192GCMKW, true),
+    A256GCMKW(KeyManagementAlgorithmIdentifiers.A256GCMKW, true),
+    PBES2_HS256_A128KW(KeyManagementAlgorithmIdentifiers.PBES2_HS256_A128KW, true),
+    PBES2_HS384_A192KW(KeyManagementAlgorithmIdentifiers.PBES2_HS384_A192KW, true),
+    PBES2_HS512_A256KW(KeyManagementAlgorithmIdentifiers.PBES2_HS512_A256KW, true),
+    DIRECT(KeyManagementAlgorithmIdentifiers.DIRECT, true),
+    NONE("none", false)
 }
 
 enum class EncryptionEncoding(val value: String) {

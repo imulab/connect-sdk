@@ -1,6 +1,7 @@
 package io.imulab.connect
 
 import io.imulab.connect.client.SigningAlgorithm
+import io.imulab.connect.client.resolvePlainTextSecret
 import kotlinx.coroutines.*
 import org.jose4j.jwk.JsonWebKey
 import org.jose4j.jwk.JsonWebKeySet
@@ -10,6 +11,9 @@ import org.jose4j.jwt.JwtClaims
 import org.jose4j.jwt.consumer.ErrorCodes
 import org.jose4j.jwt.consumer.InvalidJwtException
 import org.jose4j.jwt.consumer.JwtConsumerBuilder
+import org.jose4j.keys.AesKey
+import org.jose4j.keys.resolvers.JwksVerificationKeyResolver
+import java.nio.charset.StandardCharsets
 import java.time.Duration
 
 /**
@@ -31,7 +35,7 @@ interface AccessTokenStrategy {
      * Validate the given access token with the information assist of the original session used to generate it.
      * If the token is not valid, an exception will be raised.
      */
-    fun validateToken(token: String, session: Session)
+    fun validateToken(token: String, request: Request)
 }
 
 /**
@@ -117,12 +121,20 @@ class JwtAccessTokenStrategy(
     }
 
     override fun newToken(request: Request): String {
-        val key = jwks.selectKeyForSignature(request.client.id, signingAlgorithm)
+        var keyId = ""
+        val key = if (signingAlgorithm.symmetric) {
+            AesKey(request.client.resolvePlainTextSecret().toByteArray(StandardCharsets.UTF_8))
+        } else {
+            val jwk = jwks.selectKeyForSignature(request.client.id, signingAlgorithm)
+            keyId = jwk.keyId
+            jwk.resolvePrivateKey()
+        }
 
         return JsonWebSignature().also { jws ->
-            jws.keyIdHeaderValue = key.keyId
-            jws.algorithmHeaderValue = key.algorithm
-            jws.key = key.resolvePrivateKey()
+            if (keyId.isNotEmpty())
+                jws.keyIdHeaderValue = keyId
+            jws.algorithmHeaderValue = signingAlgorithm.value
+            jws.key = key
             jws.payload = JwtClaims().also { c ->
                 request.session.accessClaims.forEach { k, v -> c.setClaim(k, v) }
                 c.setGeneratedJwtId()
@@ -137,19 +149,22 @@ class JwtAccessTokenStrategy(
         }.compactSerialization
     }
 
-    override fun validateToken(token: String, session: Session) {
-        val key = jwks.selectKeyForSignature(session.clientId, signingAlgorithm)
-
+    override fun validateToken(token: String, request: Request) {
         try {
-            JwtConsumerBuilder()
-                .setRequireJwtId()
-                .setVerificationKey(key.resolvePublicKey())
-                .setExpectedIssuer(issuerUrl)
-                .setSkipDefaultAudienceValidation()
-                .setRequireIssuedAt()
-                .setRequireExpirationTime()
-                .build()
-                .process(token)
+            JwtConsumerBuilder().apply {
+                setRequireJwtId()
+                setExpectedIssuer(issuerUrl)
+                setSkipDefaultAudienceValidation()
+                setRequireIssuedAt()
+                setRequireExpirationTime()
+                if (signingAlgorithm.symmetric)
+                    setVerificationKey(
+                        AesKey(request.client.resolvePlainTextSecret().toByteArray(StandardCharsets.UTF_8))
+                    )
+                else
+                    setVerificationKeyResolver(JwksVerificationKeyResolver(jwks.jsonWebKeys))
+
+            }.build().process(token)
         } catch (e: InvalidJwtException) {
             when {
                 e.errorDetails.any { it.errorCode == ErrorCodes.EXPIRED } ->

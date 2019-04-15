@@ -24,7 +24,7 @@ class ConnectException(
  */
 object Errors {
 
-    fun invalidRequestError(description: String): ConnectException = ConnectException(
+    fun invalidRequest(description: String): ConnectException = ConnectException(
         error = Codes.invalidRequest,
         description = description,
         statusCode = 400
