@@ -1,13 +1,27 @@
 plugins {
     id("org.jetbrains.kotlin.jvm").version("1.3.21")
+    id("jacoco")
 }
 
 repositories {
     jcenter()
 }
 
+jacoco {
+    toolVersion = "0.8.2"
+}
+
 val test by tasks.getting(Test::class) {
     useJUnitPlatform()
+}
+
+val jacocoTestReport by tasks.getting(JacocoReport::class) {
+    reports {
+        html.apply {
+            isEnabled = true
+        }
+        executionData(test)
+    }
 }
 
 dependencies {
