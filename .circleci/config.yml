@@ -34,6 +34,7 @@ orbs:
 
 jobs:
   compile:
+    working_directory: ~/project
     docker:
       - image: "circleci/openjdk:11.0.2"
     steps:
@@ -45,17 +46,18 @@ jobs:
       - save_gradle_wrapper
       - save_gradle_dependencies
       - persist_to_workspace:
-          root: workspace
+          root: ~/project
           paths:
-            - build
+            - .
   test:
+    working_directory: ~/project
     docker:
       - image: "circleci/openjdk:11.0.2"
     steps:
       - restore_gradle_wrapper
       - restore_gradle_dependencies
       - attach_workspace:
-          at: workspace
+          at: ~/project
       - gradle:
           cmd: test jacocoTestReport
       - codecov/upload:
