@@ -77,7 +77,7 @@ jobs:
       - restore_gradle
       - run: |
           chmod +x .circleci/check_version.sh
-          ./circleci/check_version.sh
+          ./.circleci/check_version.sh
       - gradle:
           cmd: bintrayUpload -x build -x test
 
