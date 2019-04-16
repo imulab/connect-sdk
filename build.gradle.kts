@@ -20,6 +20,9 @@ val jacocoTestReport by tasks.getting(JacocoReport::class) {
         html.apply {
             isEnabled = true
         }
+        xml.apply {
+            isEnabled = true
+        }
         executionData(test)
     }
 }
