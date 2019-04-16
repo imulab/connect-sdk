@@ -25,7 +25,9 @@ private const val COLON = ":"
  */
 class ClientSecretBasicAuthenticator(
     private val clientLookup: ClientLookup,
-    private val secretComparator: SecretComparator
+    private val secretComparator: SecretComparator = object : SecretComparator {
+        override fun compare(plain: String, truth: String): Boolean = plain == truth
+    }
 ) : Authenticator {
 
     private val decoder = Base64.getDecoder()

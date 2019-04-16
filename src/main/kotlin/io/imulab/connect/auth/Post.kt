@@ -22,7 +22,9 @@ private const val CLIENT_SECRET = "client_secret"
  */
 class ClientSecretPostAuthenticator(
     private val clientLookup: ClientLookup,
-    private val secretComparator: SecretComparator
+    private val secretComparator: SecretComparator = object : SecretComparator {
+        override fun compare(plain: String, truth: String): Boolean = plain == truth
+    }
 ) : Authenticator {
 
     override suspend fun authenticate(httpRequest: HttpRequest, request: TokenRequest) {
