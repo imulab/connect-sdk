@@ -62,12 +62,38 @@ jobs:
           cmd: test jacocoTestReport
       - codecov/upload:
           file: build/reports/jacoco/test/jacocoTestReport.xml
+  build:
+    <<: *default_config
+    steps:
+      - restore_workspace
+      - restore_gradle
+      - gradle:
+          cmd: build -x test
+      - save_workspace
+  publish:
+    <<: *default_config
+    steps:
+      - restore_workspace
+      - restore_gradle
+      - gradle:
+          cmd: bintrayUpload -x build -x test
 
 workflows:
   version: 2.1
-  ctbp:
+  ctp:
     jobs:
       - compile
       - test:
           requires:
             - compile
+      - build:
+          requires:
+            - compile
+      - hold:
+          type: approval
+          requires:
+            - build
+            - test
+      - publish:
+          requires:
+            - hold
