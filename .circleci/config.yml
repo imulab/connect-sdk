@@ -19,26 +19,22 @@ commands:
           root: ~/project
           paths:
             - .
-  attach_workspace:
+  restore_workspace:
     steps:
       - attach_workspace:
           at: ~/project
-  restore_gradle_wrapper:
+  restore_gradle:
     steps:
       - restore_cache:
           key: dependency-cache-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
-  restore_gradle_dependencies:
-    steps:
       - restore_cache:
           key: dependency-cache-{{ checksum "build.gradle.kts" }}
-  save_gradle_wrapper:
+  save_gradle:
     steps:
       - save_cache:
           key: dependency-cache-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
           paths:
             - ~/.gradle/wrapper
-  save_gradle_dependencies:
-    steps:
       - save_cache:
           key: dependency-cache-{{ checksum "build.gradle.kts" }}
           paths:
@@ -52,19 +48,16 @@ jobs:
     <<: *default_config
     steps:
       - checkout
-      - restore_gradle_wrapper
-      - restore_gradle_dependencies
+      - restore_gradle
       - gradle:
           cmd: compileKotlin compileTestKotlin
-      - save_gradle_wrapper
-      - save_gradle_dependencies
+      - save_gradle
       - save_workspace
   test:
     <<: *default_config
     steps:
-      - attach_workspace
-      - restore_gradle_wrapper
-      - restore_gradle_dependencies
+      - restore_workspace
+      - restore_gradle
       - gradle:
           cmd: test jacocoTestReport
       - codecov/upload:
