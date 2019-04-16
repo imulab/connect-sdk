@@ -1,26 +1,40 @@
 version: 2.1
 
-commands:
-  restore_gradle_wrapper:
+references:
+  default_config: &default_config
+    docker:
+      - image: "circleci/openjdk:11.0.2"
+      working_directory: ~/project
+  save_workspace: &save_workspace
+    persist_to_workspace:
+      root: ~/project
+      paths:
+        - .
+  attach_workspace: &attach_workspace
+    attach_workspace:
+      at: ~/project
+  restore_gradle_wrapper: &restore_gradle_wrapper
     steps:
       - restore_cache:
           key: dependency-cache-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
-  restore_gradle_dependencies:
+  restore_gradle_dependencies: &restore_gradle_dependencies
     steps:
       - restore_cache:
           key: dependency-cache-{{ checksum "build.gradle.kts" }}
-  save_gradle_wrapper:
+  save_gradle_wrapper: &save_gradle_wrapper
     steps:
       - save_cache:
           key: dependency-cache-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
           paths:
             - ~/.gradle/wrapper
-  save_gradle_dependencies:
-    steps:
-      - save_cache:
-          key: dependency-cache-{{ checksum "build.gradle.kts" }}
-          paths:
-            - ~/.gradle/caches
+    save_gradle_dependencies: &save_gradle_dependencies
+      steps:
+        - save_cache:
+            key: dependency-cache-{{ checksum "build.gradle.kts" }}
+            paths:
+              - ~/.gradle/caches
+
+commands:
   gradle:
     parameters:
       cmd:
@@ -34,30 +48,22 @@ orbs:
 
 jobs:
   compile:
-    working_directory: ~/project
-    docker:
-      - image: "circleci/openjdk:11.0.2"
+    <<: *default_config
     steps:
       - checkout
-      - restore_gradle_wrapper
-      - restore_gradle_dependencies
+      - *restore_gradle_wrapper
+      - *restore_gradle_dependencies
       - gradle:
           cmd: compileKotlin compileTestKotlin
-      - save_gradle_wrapper
-      - save_gradle_dependencies
-      - persist_to_workspace:
-          root: ~/project
-          paths:
-            - .
+      - *save_gradle_wrapper
+      - *save_gradle_dependencies
+      - *save_workspace
   test:
-    working_directory: ~/project
-    docker:
-      - image: "circleci/openjdk:11.0.2"
+    <<: *default_config
     steps:
-      - restore_gradle_wrapper
-      - restore_gradle_dependencies
-      - attach_workspace:
-          at: ~/project
+      - *attach_workspace
+      - *restore_gradle_wrapper
+      - *restore_gradle_dependencies
       - gradle:
           cmd: test jacocoTestReport
       - codecov/upload:
