@@ -3,7 +3,9 @@
 set -e
 
 gradle_version=$( ./gradlew properties -q | grep "version:" | awk '{print $2}' )
-if [[ "${gradle_version}" != "${CIRCLE_TAG}" ]]; then
+if [[ "$CIRCLE_TAG" == "" ]]; then
+    echo "Git tag not defined, version check skipped."
+elif [[ "$gradle_version" != "$CIRCLE_TAG" ]]; then
     echo "To publish, gradle project version must match git tag"
     exit 1
 fi
