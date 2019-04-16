@@ -26,4 +26,4 @@ jobs:
           name: test
           command: ./gradlew test jacocoTestReport
       - codecov/upload:
-          file: build/reports/jacoco/jacocoTestReport.xml
+          file: build/reports/jacoco/test/jacocoTestReport.xml
