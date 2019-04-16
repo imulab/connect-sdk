@@ -60,3 +60,12 @@ jobs:
           cmd: test jacocoTestReport
       - codecov/upload:
           file: build/reports/jacoco/test/jacocoTestReport.xml
+
+workflows:
+  version: 2.1
+  ctbp:
+    jobs:
+      - compile
+      - test:
+          requires:
+            - compile
