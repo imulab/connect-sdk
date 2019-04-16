@@ -268,12 +268,12 @@ interface Session {
     /**
      * Convenience method to test if refresh token should be generated
      */
-    fun authorizedRefreshToken(): Boolean = grantedScopes.contains(offlineAccess)
+    fun authorizedRefreshToken(): Boolean = grantedScopes.contains(OFFLINE_ACCESS)
 
     /**
      * Convenience method to test if id token should be generated
      */
-    fun authorizeIdToken(): Boolean = grantedScopes.contains(openId)
+    fun authorizeIdToken(): Boolean = grantedScopes.contains(OPEN_ID)
 }
 
 /**

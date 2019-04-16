@@ -8,14 +8,15 @@ import io.imulab.connect.client.mustAcceptResponseType
 import kotlinx.coroutines.Job
 
 /**
- * Handler responsible for hybrid flow.
+ * Handler responsible for hybrid flow. This implementation only handles the authorize leg of the flow. Since the
+ * token leg of the flow is completely identical to that of the authorize code flow, to gain functionality of the
+ * token leg, chain a [AuthorizeCodeFlowHandler] before or after this handler.
  */
 class HybridFlowHandler(
-    private val authorizeCodeFlowHandler: AuthorizeCodeFlowHandler,
     private val authorizeCodeHelper: AuthorizeCodeHelper,
     private val accessTokenHelper: AccessTokenHelper,
     private val idTokenHelper: IdTokenHelper
-) : AuthorizeHandler, TokenHandler by authorizeCodeFlowHandler {
+) : AuthorizeHandler {
 
     override suspend fun authorize(request: AuthorizeRequest, response: Response) {
         if (!supports(request))
@@ -32,6 +33,7 @@ class HybridFlowHandler(
         accessTokenJob?.join()
 
         issueIdToken(request, response)
+        request.markResponseTypeAsHandled(ResponseType.ID_TOKEN)
     }
 
     private suspend fun issueAuthorizeCode(request: AuthorizeRequest, response: Response): Job {

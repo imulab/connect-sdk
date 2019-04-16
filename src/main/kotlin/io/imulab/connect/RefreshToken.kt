@@ -13,7 +13,7 @@ import java.util.concurrent.ThreadLocalRandom
 /**
  * Standard scope to grant refresh token
  */
-const val offlineAccess = "offline_access"
+const val OFFLINE_ACCESS = "offline_access"
 
 /**
  * Refresh token related algorithms.

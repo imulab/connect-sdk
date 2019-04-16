@@ -15,7 +15,7 @@ import java.util.*
 /**
  * Standard scope to allow generating id token.
  */
-const val openId = "openid"
+const val OPEN_ID = "openid"
 
 /**
  * Id token related algorithm.

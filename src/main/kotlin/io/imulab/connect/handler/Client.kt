@@ -19,7 +19,7 @@ class ClientCredentialsFlowHandler(
             return
 
         request.client.apply {
-            if (type != ClientType.PUBLIC)
+            if (type == ClientType.PUBLIC)
                 throw Errors.invalidGrant("public client cannot use client_credentials grant")
             mustAcceptGrantType(GrantType.CLIENT)
             mustAcceptAllScopes(request.scopes)
