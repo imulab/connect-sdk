@@ -27,6 +27,8 @@ val jacocoTestReport by tasks.getting(JacocoReport::class) {
     }
 }
 
+version = "0.1.0"
+
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.2.0")
