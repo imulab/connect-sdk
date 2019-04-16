@@ -73,9 +73,7 @@ class SimpleParameterParser(
         wip.prompt.addAll(httpRequest.parameter(PROMPT).spaceSplit().map { Prompt.parse(it) }.toSet())
 
         // OPTIONAL: max_age
-        httpRequest.parameter(MAX_AGE).toLongOrNull()?.apply {
-            wip.maxAge = this
-        } ?: throw Errors.invalidRequest("max_age is invalid: not a long integer.")
+        wip.maxAge = httpRequest.parameter(MAX_AGE).toLongOrNull() ?: 0L
 
         // OPTIONAL: nonce
         wip.nonce = httpRequest.parameter(NONCE)

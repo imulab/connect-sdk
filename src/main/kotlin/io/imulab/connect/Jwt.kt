@@ -78,4 +78,4 @@ fun JwtClaims.getClaimsLocales(): List<String> = safeString(CLAIMS_LOCALES).spac
  * Utility method to safely get string from JwtClaims.
  */
 fun JwtClaims.safeString(name: String): String =
-    kotlin.runCatching { getStringClaimValue(name) }.getOrDefault("")
+    kotlin.runCatching { getStringClaimValue(name) }.getOrNull() ?: ""

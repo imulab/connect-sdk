@@ -131,7 +131,7 @@ class RequestOrUriParser(
 
         wip.claims.putAll(
             kotlin.runCatching {
-                claims.getClaimValue(CLAIMS, HashMap::class.java)
+                claims.getClaimValue(CLAIMS, HashMap::class.java) ?: HashMap<String, Any>()
             }.getOrNull()?.mapKeys { it.toString() } ?: emptyMap()
         )
 
