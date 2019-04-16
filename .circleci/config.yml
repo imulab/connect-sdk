@@ -4,7 +4,7 @@ references:
   default_config: &default_config
     docker:
       - image: "circleci/openjdk:11.0.2"
-      working_directory: ~/project
+    working_directory: ~/project
   save_workspace: &save_workspace
     persist_to_workspace:
       root: ~/project
