@@ -33,7 +33,7 @@ orbs:
   codecov: codecov/codecov@1.0.2
 
 jobs:
-  build:
+  compile:
     docker:
       - image: "circleci/openjdk:11.0.2"
     steps:
@@ -41,9 +41,21 @@ jobs:
       - restore_gradle_wrapper
       - restore_gradle_dependencies
       - gradle:
-          cmd: build
+          cmd: compileKotlin compileTestKotlin
       - save_gradle_wrapper
       - save_gradle_dependencies
+      - persist_to_workspace:
+          root: workspace
+          paths:
+            - build
+  test:
+    docker:
+      - image: "circleci/openjdk:11.0.2"
+    steps:
+      - restore_gradle_wrapper
+      - restore_gradle_dependencies
+      - attach_workspace:
+          at: workspace
       - gradle:
           cmd: test jacocoTestReport
       - codecov/upload:
