@@ -1,5 +1,11 @@
 # Connect SDK 🚅
 
+![CircleCI (all branches)](https://img.shields.io/circleci/project/github/imulab/connect-sdk.svg?style=popout-square)
+![Codecov](https://img.shields.io/codecov/c/github/imulab/connect-sdk.svg?style=popout-square)
+![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/imulab/connect-sdk.svg?style=popout-square)
+![GitHub tag (latest SemVer)](https://img.shields.io/github/tag/imulab/connect-sdk.svg?label=version&style=popout-square)
+
+
 > Make providing Open ID Connect service easier!
 
 <img align="right" src="./doc/assets/openid-logo.png" height="170">
