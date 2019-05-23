@@ -43,7 +43,7 @@ class ClientSecretBasicAuthenticator(
 
         compareSecret(parts[1], client)
 
-        request.mergeWith(ConnectTokenRequest(id = "", _client = client))
+        request.mergeWith(ConnectTokenRequest(id = "", client = client))
     }
 
     private fun decodeHeader(httpRequest: HttpRequest): List<String> {

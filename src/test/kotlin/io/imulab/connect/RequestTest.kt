@@ -59,7 +59,7 @@ class RequestTest : BehaviorSpec({
     given("two token request (first and second)") {
         val first = {
             ConnectTokenRequest(
-                _client = mockClient,
+                client = mockClient,
                 redirectUri = "https://test.org/callback",
                 grantTypes = mutableSetOf(GrantType.CODE),
                 code = "a-code"
@@ -67,7 +67,7 @@ class RequestTest : BehaviorSpec({
         }
         val second = {
             ConnectTokenRequest(
-                _client = mockClient,
+                client = mockClient,
                 code = "b-code",
                 grantTypes = mutableSetOf(GrantType.CODE, GrantType.REFRESH),
                 refreshToken = "b-token"
@@ -114,12 +114,12 @@ class RequestTest : BehaviorSpec({
     given("two authorize request (first and second)") {
         val first = {
             ConnectAuthorizeRequest(
-                _client = mockClient,
+                client = mockClient,
                 scopes = mutableSetOf("foo"),
                 state = "12345678",
                 nonce = "87654321",
-                _responseMode = ResponseMode.QUERY,
-                _display = Display.PAGE,
+                responseMode = ResponseMode.QUERY,
+                display = Display.PAGE,
                 session = ConnectSession()
             )
         }

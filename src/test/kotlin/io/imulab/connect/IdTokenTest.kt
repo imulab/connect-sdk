@@ -18,7 +18,7 @@ class IdTokenTest : FeatureSpec({
         scenario("generate for client requesting symmetric signing with secret") {
             val response: Response = mutableMapOf()
             val request = ConnectTokenRequest(
-                _client = signWithSecretClient,
+                client = signWithSecretClient,
                 session = sampleSession().apply {
                     clientId = signWithSecretClient.id
                 }
@@ -32,7 +32,7 @@ class IdTokenTest : FeatureSpec({
         scenario("generate for client requesting asymmetric signing with server jwks") {
             val response: Response = mutableMapOf()
             val request = ConnectTokenRequest(
-                _client = signWithJwksClient,
+                client = signWithJwksClient,
                 session = sampleSession().apply {
                     clientId = signWithJwksClient.id
                 }
@@ -46,7 +46,7 @@ class IdTokenTest : FeatureSpec({
         scenario("generate for client requesting signing and encryption") {
             val response: Response = mutableMapOf()
             val request = ConnectTokenRequest(
-                _client = signAndEncryptClient,
+                client = signAndEncryptClient,
                 session = sampleSession().apply {
                     clientId = signAndEncryptClient.id
                 }
@@ -60,7 +60,7 @@ class IdTokenTest : FeatureSpec({
         scenario("generate for client requesting only encryption") {
             val response: Response = mutableMapOf()
             val request = ConnectTokenRequest(
-                _client = encryptOnlyClient,
+                client = encryptOnlyClient,
                 session = sampleSession().apply {
                     clientId = encryptOnlyClient.id
                 }
@@ -74,7 +74,7 @@ class IdTokenTest : FeatureSpec({
         scenario("access token hash and/or code hash is included") {
             val response: Response = mutableMapOf()
             val request = ConnectTokenRequest(
-                _client = signWithSecretClient,
+                client = signWithSecretClient,
                 session = sampleSession().apply {
                     clientId = signWithSecretClient.id
                 }

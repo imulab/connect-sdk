@@ -34,7 +34,7 @@ class HandlerTest : FeatureSpec({
             val authorizeRequest = ConnectAuthorizeRequest(
                 id = UUID.randomUUID().toString(),
                 requestedAt = LocalDateTime.now(),
-                _client = sampleClient,
+                client = sampleClient,
                 redirectUri = "https://test.org/callback",
                 responseTypes = mutableSetOf(ResponseType.CODE),
                 scopes = mutableSetOf("foo", "bar", OPEN_ID, OFFLINE_ACCESS),
@@ -61,7 +61,7 @@ class HandlerTest : FeatureSpec({
             val tokenRequest = ConnectTokenRequest(
                 id = UUID.randomUUID().toString(),
                 requestedAt = LocalDateTime.now(),
-                _client = sampleClient,
+                client = sampleClient,
                 redirectUri = "https://test.org/callback",
                 code = code,
                 grantTypes = mutableSetOf(GrantType.CODE),
@@ -81,7 +81,7 @@ class HandlerTest : FeatureSpec({
             val refreshRequest = ConnectTokenRequest(
                 id = UUID.randomUUID().toString(),
                 requestedAt = LocalDateTime.now(),
-                _client = sampleClient,
+                client = sampleClient,
                 redirectUri = "https://test.org/callback",
                 grantTypes = mutableSetOf(GrantType.REFRESH),
                 refreshToken = tokenResponse.getRefreshToken(),
@@ -117,7 +117,7 @@ class HandlerTest : FeatureSpec({
             val authorizeRequest = ConnectAuthorizeRequest(
                 id = UUID.randomUUID().toString(),
                 requestedAt = LocalDateTime.now(),
-                _client = insufficientClient,
+                client = insufficientClient,
                 redirectUri = "https://test.org/callback",
                 responseTypes = mutableSetOf(ResponseType.CODE),
                 scopes = mutableSetOf("foo", "bar", OPEN_ID, OFFLINE_ACCESS),
@@ -147,7 +147,7 @@ class HandlerTest : FeatureSpec({
             val authorizeRequest = ConnectAuthorizeRequest(
                 id = UUID.randomUUID().toString(),
                 requestedAt = LocalDateTime.now(),
-                _client = sampleClient,
+                client = sampleClient,
                 redirectUri = "https://test.org/callback",
                 responseTypes = mutableSetOf(ResponseType.CODE),
                 scopes = mutableSetOf("foo", "bar", OPEN_ID, OFFLINE_ACCESS),
@@ -173,7 +173,7 @@ class HandlerTest : FeatureSpec({
             val tokenRequest = ConnectTokenRequest(
                 id = UUID.randomUUID().toString(),
                 requestedAt = LocalDateTime.now(),
-                _client = sampleClient,
+                client = sampleClient,
                 redirectUri = "https://test.org/callback",
                 code = "invalid_code",
                 grantTypes = mutableSetOf(GrantType.CODE),
@@ -196,7 +196,7 @@ class HandlerTest : FeatureSpec({
             val authorizeRequest = ConnectAuthorizeRequest(
                 id = UUID.randomUUID().toString(),
                 requestedAt = LocalDateTime.now(),
-                _client = sampleClient,
+                client = sampleClient,
                 redirectUri = "https://test.org/callback",
                 responseTypes = mutableSetOf(ResponseType.TOKEN, ResponseType.ID_TOKEN),
                 scopes = mutableSetOf("foo", "bar", OPEN_ID),
@@ -235,7 +235,7 @@ class HandlerTest : FeatureSpec({
             val authorizeRequest = ConnectAuthorizeRequest(
                 id = UUID.randomUUID().toString(),
                 requestedAt = LocalDateTime.now(),
-                _client = sampleClient,
+                client = sampleClient,
                 redirectUri = "https://test.org/callback",
                 responseTypes = mutableSetOf(ResponseType.CODE, ResponseType.ID_TOKEN),
                 scopes = mutableSetOf("foo", "bar", OPEN_ID, OFFLINE_ACCESS),
@@ -263,7 +263,7 @@ class HandlerTest : FeatureSpec({
             val tokenRequest = ConnectTokenRequest(
                 id = UUID.randomUUID().toString(),
                 requestedAt = LocalDateTime.now(),
-                _client = sampleClient,
+                client = sampleClient,
                 redirectUri = "https://test.org/callback",
                 code = code,
                 grantTypes = mutableSetOf(GrantType.CODE),
@@ -288,7 +288,7 @@ class HandlerTest : FeatureSpec({
             val tokenRequest = ConnectTokenRequest(
                 id = UUID.randomUUID().toString(),
                 requestedAt = LocalDateTime.now(),
-                _client = sampleClient,
+                client = sampleClient,
                 redirectUri = "https://test.org/callback",
                 grantTypes = mutableSetOf(GrantType.CLIENT),
                 session = ConnectSession(),

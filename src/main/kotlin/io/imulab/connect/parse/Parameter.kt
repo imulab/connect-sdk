@@ -2,10 +2,7 @@ package io.imulab.connect.parse
 
 import io.imulab.connect.*
 import io.imulab.connect.auth.CLIENT_ID
-import io.imulab.connect.client.Client
-import io.imulab.connect.client.ClientLookup
-import io.imulab.connect.client.GrantType
-import io.imulab.connect.client.ResponseType
+import io.imulab.connect.client.*
 import io.imulab.connect.spi.HttpRequest
 import io.imulab.connect.spi.JsonProvider
 import kotlinx.coroutines.Deferred
@@ -42,8 +39,8 @@ class SimpleParameterParser(
         val wip = ConnectAuthorizeRequest(id = "")
 
         // REQUIRED: client_id
-        if (tryClient(accumulator) == null && httpRequest.parameter(CLIENT_ID).isNotEmpty())
-            wip._client = getClient(httpRequest).await()
+        if (accumulator.client is NothingClient && httpRequest.parameter(CLIENT_ID).isNotEmpty())
+            wip.client = getClient(httpRequest).await()
 
         // REQUIRED: response_type
         wip.responseTypes.addAll(
@@ -60,12 +57,12 @@ class SimpleParameterParser(
         wip.state = httpRequest.parameter(STATE)
 
         // OPTIONAL: response_mode, default to QUERY
-        wip._responseMode = ResponseMode.parse(
+        wip.responseMode = ResponseMode.parse(
             httpRequest.parameter(RESPONSE_MODE).withDefault(ResponseMode.QUERY.value)
         )
 
         // OPTIONAL: display, default to PAGE
-        wip._display = Display.parse(
+        wip.display = Display.parse(
             httpRequest.parameter(DISPLAY).withDefault(Display.PAGE.value)
         )
 
@@ -109,8 +106,8 @@ class SimpleParameterParser(
         val wip = ConnectTokenRequest(id = "")
 
         // REQUIRED: client_id
-        if (tryClient(accumulator) == null && httpRequest.parameter(CLIENT_ID).isNotEmpty())
-            wip._client = getClient(httpRequest).await()
+        if (accumulator.client is NothingClient && httpRequest.parameter(CLIENT_ID).isNotEmpty())
+            wip.client = getClient(httpRequest).await()
 
         // REQUIRED: redirect_uri
         wip.redirectUri = httpRequest.parameter(REDIRECT_URI)
@@ -144,12 +141,6 @@ class SimpleParameterParser(
         return jsonProvider.deserialize(raw)
     }
 }
-
-/**
- * Utility extension to test if the client is already set.
- */
-internal fun tryClient(request: Request): Client? =
-    kotlin.runCatching { request.client }.getOrNull()
 
 internal const val REFRESH_TOKEN = "refresh_token"
 internal const val CODE = "code"

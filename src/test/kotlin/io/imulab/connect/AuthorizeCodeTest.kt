@@ -19,7 +19,7 @@ class AuthorizeCodeTest : FeatureSpec({
         scenario("authorize request generates code") {
             val response: Response = mutableMapOf()
             val request = ConnectAuthorizeRequest(
-                _client = client,
+                client = client,
                 session = sampleSession
             )
 
@@ -34,7 +34,7 @@ class AuthorizeCodeTest : FeatureSpec({
         scenario("valid authorize code") {
             val response: Response = mutableMapOf()
             val code = helper.issueCode(ConnectAuthorizeRequest(
-                _client = client,
+                client = client,
                 session = sampleSession
             ), response).join().let { response.getCode() }
 
@@ -44,7 +44,7 @@ class AuthorizeCodeTest : FeatureSpec({
         scenario("invalid authorize code") {
             val response: Response = mutableMapOf()
             val code = helper.issueCode(ConnectAuthorizeRequest(
-                _client = client,
+                client = client,
                 session = sampleSession
             ), response).join().let { response.getCode() }
 
@@ -59,7 +59,7 @@ class AuthorizeCodeTest : FeatureSpec({
         scenario("compute identifier of generated code") {
             val response: Response = mutableMapOf()
             val code = helper.issueCode(ConnectAuthorizeRequest(
-                _client = client,
+                client = client,
                 session = sampleSession
             ), response).join().let { response.getCode() }
 

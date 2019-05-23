@@ -39,7 +39,7 @@ class NoneAuthenticator(
                 throw Errors.clientForbidden("client is not registered to use JWT based authentication")
         }
 
-        request.mergeWith(ConnectTokenRequest(id = "", _client = client))
+        request.mergeWith(ConnectTokenRequest(id = "", client = client))
     }
 
     override fun implements(): List<AuthenticationMethod> = listOf(AuthenticationMethod.NONE)

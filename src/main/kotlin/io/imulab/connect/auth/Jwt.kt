@@ -46,7 +46,7 @@ class ClientJwtAuthenticator(
             else -> return
         }
 
-        request.mergeWith(ConnectTokenRequest(id = "", _client = client))
+        request.mergeWith(ConnectTokenRequest(id = "", client = client))
     }
 
     private fun getClientId(httpRequest: HttpRequest): String {

@@ -37,7 +37,7 @@ class ClientSecretPostAuthenticator(
 
         compareSecret(httpRequest.parameter(CLIENT_SECRET), client)
 
-        request.mergeWith(ConnectTokenRequest(id = "", _client = client))
+        request.mergeWith(ConnectTokenRequest(id = "", client = client))
     }
 
     private suspend fun findClient(id: String): Client {

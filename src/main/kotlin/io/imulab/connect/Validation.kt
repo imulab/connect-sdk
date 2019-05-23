@@ -1,8 +1,8 @@
 package io.imulab.connect
 
+import io.imulab.connect.client.NothingClient
 import io.imulab.connect.client.mustAcceptGrantType
 import io.imulab.connect.client.mustAcceptResponseType
-import io.imulab.connect.parse.tryClient
 import io.imulab.connect.spi.Discovery
 import io.imulab.connect.spi.mustAcceptGrantType
 import io.imulab.connect.spi.mustAcceptResponseType
@@ -20,8 +20,8 @@ fun AuthorizeRequest.validate(discovery: Discovery) {
 }
 
 private fun Request.ensureClient() {
-    val client = tryClient(this)
-        ?: throw Errors.invalidRequest("client_id is required.")
+    if (client is NothingClient)
+        throw Errors.invalidRequest("client_id is required.")
     if (client.id != session.clientId)
         throw Errors.serverError("client_id and session client_id mismatch")
 }

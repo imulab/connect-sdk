@@ -7,8 +7,8 @@ import com.nhaarman.mockitokotlin2.mock
 import io.imulab.connect.auth.*
 import io.imulab.connect.client.*
 import io.imulab.connect.spi.HttpRequest
-import io.kotlintest.shouldBe
-import io.kotlintest.shouldNotBe
+import io.kotlintest.matchers.types.shouldBeTypeOf
+import io.kotlintest.matchers.types.shouldNotBeTypeOf
 import io.kotlintest.shouldThrowExactly
 import io.kotlintest.specs.FeatureSpec
 import org.jose4j.jwk.JsonWebKeySet
@@ -41,7 +41,7 @@ class AuthenticationTest : FeatureSpec({
 
             authHandler.authenticate(httpRequest, req)
 
-            req._client shouldNotBe null
+            req.client.shouldNotBeTypeOf<NothingClient>()
         }
 
         scenario("incorrect credentials shall be rejected") {
@@ -64,7 +64,7 @@ class AuthenticationTest : FeatureSpec({
             shouldThrowExactly<ConnectException> {
                 authHandler.authenticate(httpRequest, req)
             }
-            req._client shouldBe null
+            req.client.shouldBeTypeOf<NothingClient>()
         }
     }
 
@@ -90,7 +90,7 @@ class AuthenticationTest : FeatureSpec({
 
             authHandler.authenticate(httpRequest, req)
 
-            req._client shouldNotBe null
+            req.client.shouldNotBeTypeOf<NothingClient>()
         }
 
         scenario("incorrect credentials shall be rejected") {
@@ -115,7 +115,7 @@ class AuthenticationTest : FeatureSpec({
             shouldThrowExactly<ConnectException> {
                 authHandler.authenticate(httpRequest, req)
             }
-            req._client shouldBe null
+            req.client.shouldBeTypeOf<NothingClient>()
         }
     }
 
@@ -155,7 +155,7 @@ class AuthenticationTest : FeatureSpec({
 
             authHandler.authenticate(httpRequest, req)
 
-            req._client shouldNotBe null
+            req.client.shouldNotBeTypeOf<NothingClient>()
         }
 
         scenario("incorrect credentials shall be rejected") {
@@ -194,7 +194,7 @@ class AuthenticationTest : FeatureSpec({
             shouldThrowExactly<ConnectException> {
                 authHandler.authenticate(httpRequest, req)
             }
-            req._client shouldBe null
+            req.client.shouldBeTypeOf<NothingClient>()
         }
     }
 
@@ -235,7 +235,7 @@ class AuthenticationTest : FeatureSpec({
 
             authHandler.authenticate(httpRequest, req)
 
-            req._client shouldNotBe null
+            req.client.shouldNotBeTypeOf<NothingClient>()
         }
 
         scenario("incorrect credentials shall be rejected") {
@@ -280,7 +280,7 @@ class AuthenticationTest : FeatureSpec({
             shouldThrowExactly<ConnectException> {
                 authHandler.authenticate(httpRequest, req)
             }
-            req._client shouldBe null
+            req.client.shouldBeTypeOf<NothingClient>()
         }
     }
 
