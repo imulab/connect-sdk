@@ -5,6 +5,9 @@ import com.nhaarman.mockitokotlin2.mock
 import io.imulab.connect.client.*
 import io.kotlintest.matchers.string.shouldNotBeEmpty
 import io.kotlintest.specs.FeatureSpec
+import org.jose4j.jwa.AlgorithmConstraints
+import org.jose4j.jwe.JsonWebEncryption
+import org.jose4j.jwk.JsonWebKey
 import org.jose4j.jwk.JsonWebKeySet
 import org.jose4j.jwk.RsaJwkGenerator
 import org.jose4j.jwk.Use
@@ -13,6 +16,69 @@ import java.time.Duration
 import java.time.LocalDateTime
 
 class IdTokenTest : FeatureSpec({
+
+    feature("decode id token") {
+        scenario("decode a signed id_token") {
+            val response: Response = mutableMapOf()
+            val request = ConnectTokenRequest(
+                client = signWithJwksClient,
+                session = sampleSession().apply {
+                    clientId = signWithJwksClient.id
+                }
+            )
+            helper.issueToken(request, response)
+            val idToken = response.getIdToken()
+
+            val claims = strategy.decodeToken(idToken, request)
+            claims.jwtId.shouldNotBeEmpty()
+            claims.subject.shouldNotBeEmpty()
+        }
+
+        scenario("client re-encrypts the id_token and send it back (id_token_hint)") {
+            val response: Response = mutableMapOf()
+            val request = ConnectTokenRequest(
+                client = signAndEncryptClient,
+                session = sampleSession().apply {
+                    clientId = signAndEncryptClient.id
+                }
+            )
+
+            helper.issueToken(request, response)
+            val idToken = response.getIdToken()
+
+            // here we simulate the process where client decrypts the token and re-encrypt it with
+            // a key known to the server so server can decrypt it again.
+            val jwt = JsonWebEncryption().apply {
+                setAlgorithmConstraints(
+                    AlgorithmConstraints(AlgorithmConstraints.ConstraintType.WHITELIST,
+                        signAndEncryptClient.idTokenEncryptedResponseAlgorithm.value
+                    ))
+                setContentEncryptionAlgorithmConstraints(
+                    AlgorithmConstraints(AlgorithmConstraints.ConstraintType.WHITELIST,
+                        signAndEncryptClient.idTokenEncryptedResponseEncoding.value
+                    ))
+                compactSerialization = idToken
+                key = signAndEncryptClient.resolveJwks()
+                    .selectKeyForEncryption(signAndEncryptClient.idTokenEncryptedResponseAlgorithm)
+                    .resolvePrivateKey()
+            }.plaintextString
+            val newJwk = serverJwks.selectKeyForEncryption(EncryptionAlgorithm.RSA1_5)
+            val newJwe = JsonWebEncryption().also { jwe ->
+                jwe.setPlaintext(jwt)
+                jwe.contentTypeHeaderValue = "JWT"
+                jwe.algorithmHeaderValue = newJwk.algorithm
+                jwe.encryptionMethodHeaderParameter = signAndEncryptClient.idTokenEncryptedResponseEncoding.value
+                jwe.key = newJwk.resolvePublicKey()
+                jwe.keyIdHeaderValue = newJwk.keyId
+            }.compactSerialization
+
+            // now we ask the server to decode the re-encrypted token
+            val claims = strategy.decodeToken(newJwe, request)
+
+            claims.jwtId.shouldNotBeEmpty()
+            claims.subject.shouldNotBeEmpty()
+        }
+    }
 
     feature("generate id token") {
         scenario("generate for client requesting symmetric signing with secret") {
@@ -126,7 +192,7 @@ class IdTokenTest : FeatureSpec({
                     use = Use.ENCRYPTION
                     algorithm = EncryptionAlgorithm.RSA1_5.value
                 }
-            ).toJson()
+            ).toJson(JsonWebKey.OutputControlLevel.INCLUDE_PRIVATE)
         }
 
         val encryptOnlyClient = mock<JwksAwareClient> {
@@ -143,17 +209,24 @@ class IdTokenTest : FeatureSpec({
             ).toJson()
         }
 
+        val serverJwks = JsonWebKeySet(
+            RsaJwkGenerator.generateJwk(2048).apply {
+                keyId = "server-test-key"
+                use = Use.SIGNATURE
+                algorithm = SigningAlgorithm.RS256.value
+            },
+            RsaJwkGenerator.generateJwk(2048).apply {
+                keyId = "server-test-key-2"
+                use = Use.ENCRYPTION
+                algorithm = EncryptionAlgorithm.RSA1_5.value
+            }
+        )
+
         val strategy = JwxIdTokenStrategy(
             lifespan = Duration.ofDays(1),
             signingAlgorithm = SigningAlgorithm.RS256,
             issuerUrl = "https://test.org",
-            jwks = JsonWebKeySet(
-                RsaJwkGenerator.generateJwk(2048).apply {
-                    keyId = "server-test-key"
-                    use = Use.SIGNATURE
-                    algorithm = SigningAlgorithm.RS256.value
-                }
-            )
+            jwks = serverJwks
         )
 
         val helper = IdTokenHelper(strategy = strategy)
