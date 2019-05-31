@@ -5,7 +5,10 @@ import com.nhaarman.mockitokotlin2.doAnswer
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
 import io.imulab.connect.client.*
-import io.imulab.connect.parse.*
+import io.imulab.connect.parse.ClientDetailsParser
+import io.imulab.connect.parse.DefaultValueParser
+import io.imulab.connect.parse.RequestOrUriParser
+import io.imulab.connect.parse.SimpleParameterParser
 import io.imulab.connect.spi.HttpRequest
 import io.kotlintest.matchers.collections.shouldContainExactly
 import io.kotlintest.matchers.string.shouldNotBeEmpty
@@ -45,7 +48,6 @@ class ParserTest : FeatureSpec({
                 clientDetailsParser.parse(httpRequest, request)
                 simpleParameterParser.parse(httpRequest, request)
                 defaultValueParser.parse(httpRequest, request)
-                validatingParser.parse(httpRequest, request)
             }
             request.apply {
                 id.shouldNotBeEmpty()
@@ -89,7 +91,6 @@ class ParserTest : FeatureSpec({
                 simpleParameterParser.parse(httpRequest, request)
                 requestOrUriParser.parse(httpRequest, request)
                 defaultValueParser.parse(httpRequest, request)
-                validatingParser.parse(httpRequest, request)
             }
             request.apply {
                 id.shouldNotBeEmpty()
@@ -130,7 +131,6 @@ class ParserTest : FeatureSpec({
             shouldNotThrowAny {
                 simpleParameterParser.parse(httpRequest, request)
                 defaultValueParser.parse(httpRequest, request)
-                validatingParser.parse(httpRequest, request)
             }
             request.apply {
                 id.shouldNotBeEmpty()
@@ -169,7 +169,7 @@ class ParserTest : FeatureSpec({
             on { id } doReturn "5adb2289-b448-4994-849a-3aed1efeb211"
             on { type } doReturn ClientType.CONFIDENTIAL
             on { redirectUris } doReturn setOf("https://test.org/callback", "https://test.org/callback2")
-            on { responseTypes } doReturn setOf(ResponseType.CODE, ResponseType.TOKEN)
+            on { responseTypes } doReturn setOf(ResponseType.CODE)
             on { grantTypes } doReturn setOf(GrantType.CODE)
             on { scopes } doReturn setOf("foo", "bar", OPEN_ID)
             on { jwksCache } doReturn jwks.toJson()
@@ -242,7 +242,5 @@ class ParserTest : FeatureSpec({
         )
 
         val defaultValueParser = DefaultValueParser()
-
-        val validatingParser = ValidatingParser()
     }
 }
