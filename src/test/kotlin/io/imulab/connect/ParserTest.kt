@@ -5,6 +5,7 @@ import com.nhaarman.mockitokotlin2.doAnswer
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
 import io.imulab.connect.client.*
+import io.imulab.connect.parse.ClientDetailsParser
 import io.imulab.connect.parse.DefaultValueParser
 import io.imulab.connect.parse.RequestOrUriParser
 import io.imulab.connect.parse.SimpleParameterParser
@@ -44,6 +45,7 @@ class ParserTest : FeatureSpec({
             val request = ConnectAuthorizeRequest()
 
             shouldNotThrowAny {
+                clientDetailsParser.parse(httpRequest, request)
                 simpleParameterParser.parse(httpRequest, request)
                 defaultValueParser.parse(httpRequest, request)
             }
@@ -85,6 +87,7 @@ class ParserTest : FeatureSpec({
             val request = ConnectAuthorizeRequest()
 
             shouldNotThrowAny {
+                clientDetailsParser.parse(httpRequest, request)
                 simpleParameterParser.parse(httpRequest, request)
                 requestOrUriParser.parse(httpRequest, request)
                 defaultValueParser.parse(httpRequest, request)
@@ -215,6 +218,11 @@ class ParserTest : FeatureSpec({
                 key = serverJwks.jsonWebKeys[0].resolvePublicKey()
             }.compactSerialization
         }
+
+        val clientDetailsParser = ClientDetailsParser(
+            clientLookup = clientLookup,
+            mergeBackHard = true
+        )
 
         val simpleParameterParser = SimpleParameterParser(
             clientLookup = clientLookup,
