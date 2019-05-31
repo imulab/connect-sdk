@@ -38,7 +38,7 @@ object Errors {
 
     fun unsupportedResponseType(responseType: ResponseType): ConnectException = ConnectException(
         error = Codes.unsupportedResponseType,
-        description = "response_type ${responseType.value} is not supports.",
+        description = "response_type '${responseType.value}' is not supported.",
         statusCode = 400
     )
 
