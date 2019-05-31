@@ -507,7 +507,7 @@ enum class ResponseMode(val value: String) {
     companion object {
         @JvmStatic
         fun parse(value: String): ResponseMode = values().find { it.value == value }
-            ?: throw IllegalArgumentException("$value is not a valid response mode.")
+            ?: throw Errors.invalidRequest("'$value' is not a valid response mode.")
     }
 }
 
@@ -517,7 +517,7 @@ enum class Display(val value: String) {
     companion object {
         @JvmStatic
         fun parse(value: String): Display = values().find { it.value == value }
-            ?: throw IllegalArgumentException("$value is not a valid display.")
+            ?: throw Errors.invalidRequest("'$value' is not a valid display.")
     }
 }
 
@@ -527,6 +527,6 @@ enum class Prompt(val value: String) {
     companion object {
         @JvmStatic
         fun parse(value: String): Prompt = values().find { it.value == value }
-            ?: throw IllegalArgumentException("$value is not a valid prompt.")
+            ?: throw Errors.invalidRequest("'$value' is not a valid prompt.")
     }
 }
