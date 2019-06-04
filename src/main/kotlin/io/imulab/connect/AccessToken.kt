@@ -33,9 +33,9 @@ interface AccessTokenStrategy {
 
     /**
      * Validate the given access token with the information assist of the original session used to generate it.
-     * If the token is not valid, an exception will be raised.
+     * If the token is not valid, an exception will be raised. Otherwise, the included claims are returned.
      */
-    fun validateToken(token: String, request: Request)
+    fun validateToken(token: String, request: Request): JwtClaims
 }
 
 /**
@@ -149,8 +149,8 @@ class JwtAccessTokenStrategy(
         }.compactSerialization
     }
 
-    override fun validateToken(token: String, request: Request) {
-        try {
+    override fun validateToken(token: String, request: Request): JwtClaims {
+        return try {
             JwtConsumerBuilder().apply {
                 setRequireJwtId()
                 setExpectedIssuer(issuerUrl)
@@ -164,7 +164,7 @@ class JwtAccessTokenStrategy(
                 else
                     setVerificationKeyResolver(JwksVerificationKeyResolver(jwks.jsonWebKeys))
 
-            }.build().process(token)
+            }.build().processToClaims(token)
         } catch (e: InvalidJwtException) {
             when {
                 e.errorDetails.any { it.errorCode == ErrorCodes.EXPIRED } ->
