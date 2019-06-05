@@ -40,6 +40,8 @@ class ClientSecretBasicAuthenticator(
 
         val parts = decodeHeader(httpRequest)
         val client = findClient(parts[0])
+        if (!implements().contains(client.tokenEndpointAuthMethod))
+            throw Errors.accessDenied("unsupported authentication method")
 
         compareSecret(parts[1], client)
 
