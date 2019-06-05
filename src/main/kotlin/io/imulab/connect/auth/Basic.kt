@@ -83,6 +83,6 @@ class ClientSecretBasicAuthenticator(
 
     override fun implements(): List<AuthenticationMethod> = listOf(AuthenticationMethod.BASIC)
 
-    override fun supports(httpRequest: HttpRequest): Boolean =
+    override suspend fun supports(httpRequest: HttpRequest): Boolean =
         httpRequest.header(AUTH_HEADER).startsWith(BASIC + SPACE)
 }

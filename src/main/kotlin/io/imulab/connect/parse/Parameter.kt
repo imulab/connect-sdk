@@ -89,7 +89,7 @@ class SimpleParameterParser(
         }
     }
 
-    private fun doParse(httpRequest: HttpRequest): AuthorizeRequest {
+    private suspend fun doParse(httpRequest: HttpRequest): AuthorizeRequest {
         val wip = ConnectAuthorizeRequest(id = "")
 
         // REQUIRED: response_type

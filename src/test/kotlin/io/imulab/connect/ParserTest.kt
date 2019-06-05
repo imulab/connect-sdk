@@ -26,7 +26,7 @@ class ParserTest : FeatureSpec({
             val httpRequest = mock<HttpRequest> {
                 on { method() } doReturn "GET"
                 on { header(anyOrNull()) } doReturn ""
-                on { parameter(anyOrNull()) } doAnswer { ic ->
+                onBlocking { parameter(anyOrNull()) } doAnswer { ic ->
                     when (ic.arguments[0].toString()) {
                         "client_id" -> sampleClient.id
                         "response_type" -> "code"
@@ -68,7 +68,7 @@ class ParserTest : FeatureSpec({
             val httpRequest = mock<HttpRequest> {
                 on { method() } doReturn "GET"
                 on { header(anyOrNull()) } doReturn ""
-                on { parameter(anyOrNull()) } doAnswer { ic ->
+                onBlocking { parameter(anyOrNull()) } doAnswer { ic ->
                     when (ic.arguments[0].toString()) {
                         "client_id" -> sampleClient.id
                         "response_type" -> "code"
@@ -114,7 +114,7 @@ class ParserTest : FeatureSpec({
             val httpRequest = mock<HttpRequest> {
                 on { method() } doReturn "GET"
                 on { header(anyOrNull()) } doReturn ""
-                on { parameter(anyOrNull()) } doAnswer { ic ->
+                onBlocking { parameter(anyOrNull()) } doAnswer { ic ->
                     when (ic.arguments[0].toString()) {
                         "client_id" -> sampleClient.id
                         "grant_type" -> "authorization_code"
