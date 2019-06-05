@@ -35,7 +35,7 @@ class AuthenticationTest : FeatureSpec({
                         else -> ""
                     }
                 }
-                on { parameter(anyOrNull()) } doReturn ""
+                onBlocking { parameter(anyOrNull()) } doReturn ""
             }
             val req = ConnectTokenRequest()
 
@@ -57,7 +57,7 @@ class AuthenticationTest : FeatureSpec({
                         else -> ""
                     }
                 }
-                on { parameter(anyOrNull()) } doReturn ""
+                onBlocking { parameter(anyOrNull()) } doReturn ""
             }
             val req = ConnectTokenRequest()
 
@@ -78,7 +78,7 @@ class AuthenticationTest : FeatureSpec({
                         else -> ""
                     }
                 }
-                on { parameter(anyOrNull()) } doAnswer { ic ->
+                onBlocking { parameter(anyOrNull()) } doAnswer { ic ->
                     when (ic.arguments[0].toString()) {
                         "client_id" -> postClient.id
                         "client_secret" -> postClient.secret
@@ -102,7 +102,7 @@ class AuthenticationTest : FeatureSpec({
                         else -> ""
                     }
                 }
-                on { parameter(anyOrNull()) } doAnswer { ic ->
+                onBlocking { parameter(anyOrNull()) } doAnswer { ic ->
                     when (ic.arguments[0].toString()) {
                         "client_id" -> postClient.id
                         "client_secret" -> "foobar"
@@ -142,7 +142,7 @@ class AuthenticationTest : FeatureSpec({
                         else -> ""
                     }
                 }
-                on { parameter(anyOrNull()) } doAnswer { ic ->
+                onBlocking { parameter(anyOrNull()) } doAnswer { ic ->
                     when (ic.arguments[0].toString()) {
                         "client_id" -> clientSecretJwtClient.id
                         "client_assertion" -> assertion
@@ -180,7 +180,7 @@ class AuthenticationTest : FeatureSpec({
                         else -> ""
                     }
                 }
-                on { parameter(anyOrNull()) } doAnswer { ic ->
+                onBlocking { parameter(anyOrNull()) } doAnswer { ic ->
                     when (ic.arguments[0].toString()) {
                         "client_id" -> clientSecretJwtClient.id
                         "client_assertion" -> assertion
@@ -222,7 +222,7 @@ class AuthenticationTest : FeatureSpec({
                         else -> ""
                     }
                 }
-                on { parameter(anyOrNull()) } doAnswer { ic ->
+                onBlocking { parameter(anyOrNull()) } doAnswer { ic ->
                     when (ic.arguments[0].toString()) {
                         "client_id" -> privateKeyJwtClient.id
                         "client_assertion" -> assertion
@@ -266,7 +266,7 @@ class AuthenticationTest : FeatureSpec({
                         else -> ""
                     }
                 }
-                on { parameter(anyOrNull()) } doAnswer { ic ->
+                onBlocking { parameter(anyOrNull()) } doAnswer { ic ->
                     when (ic.arguments[0].toString()) {
                         "client_id" -> privateKeyJwtClient.id
                         "client_assertion" -> assertion

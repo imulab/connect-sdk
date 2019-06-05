@@ -63,7 +63,7 @@ class ClientSecretPostAuthenticator(
 
     override fun implements(): List<AuthenticationMethod> = listOf(AuthenticationMethod.POST)
 
-    override fun supports(httpRequest: HttpRequest): Boolean {
+    override suspend fun supports(httpRequest: HttpRequest): Boolean {
         return httpRequest.method() == POST &&
             httpRequest.header(CONTENT_TYPE_HEADER) == FORM_URL_ENCODED &&
             httpRequest.parameter(CLIENT_ID).isNotEmpty() &&

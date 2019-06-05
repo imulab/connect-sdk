@@ -49,7 +49,7 @@ class ClientJwtAuthenticator(
         request.mergeWith(ConnectTokenRequest(id = "", client = client))
     }
 
-    private fun getClientId(httpRequest: HttpRequest): String {
+    private suspend fun getClientId(httpRequest: HttpRequest): String {
         var clientId = httpRequest.parameter(CLIENT_ID)
         if (clientId.isNotEmpty())
             return clientId
@@ -134,7 +134,7 @@ class ClientJwtAuthenticator(
         AuthenticationMethod.JWT_PRIVATE
     )
 
-    override fun supports(httpRequest: HttpRequest): Boolean {
+    override suspend fun supports(httpRequest: HttpRequest): Boolean {
         return httpRequest.method() == POST &&
             httpRequest.parameter(CLIENT_ASSERTION).isNotEmpty() &&
             httpRequest.parameter(CLIENT_ASSERTION_TYPE) == CLIENT_ASSERTION_JWT_BEARER

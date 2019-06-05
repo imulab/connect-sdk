@@ -29,7 +29,7 @@ interface Authenticator {
     /**
      * Test method to return true if the provided [httpRequest] can be authenticated by this authenticator.
      */
-    fun supports(httpRequest: HttpRequest): Boolean
+    suspend fun supports(httpRequest: HttpRequest): Boolean
 }
 
 /**

@@ -46,5 +46,5 @@ class NoneAuthenticator(
 
     // we do not support chained authentication in this case
     // have to explicitly call this authenticator.
-    override fun supports(httpRequest: HttpRequest): Boolean = false
+    override suspend fun supports(httpRequest: HttpRequest): Boolean = false
 }
