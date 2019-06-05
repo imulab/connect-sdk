@@ -34,6 +34,9 @@ class ClientJwtAuthenticator(
             return
 
         val client = findClient(getClientId(httpRequest))
+        if (!implements().contains(client.tokenEndpointAuthMethod))
+            throw Errors.accessDenied("unsupported authentication method")
+
         val assertion = httpRequest.parameter(CLIENT_ASSERTION)
 
         when (client.tokenEndpointAuthMethod) {
