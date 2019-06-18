@@ -342,7 +342,7 @@ enum class SigningAlgorithm(val value: String, val symmetric: Boolean) {
     HS512(AlgorithmIdentifiers.HMAC_SHA512, true),
     RS256(AlgorithmIdentifiers.RSA_USING_SHA256, false),
     RS384(AlgorithmIdentifiers.RSA_USING_SHA384, false),
-    RS512(AlgorithmIdentifiers.RSA_USING_SHA384, false),
+    RS512(AlgorithmIdentifiers.RSA_USING_SHA512, false),
     ES256(AlgorithmIdentifiers.ECDSA_USING_P256_CURVE_AND_SHA256, false),
     ES384(AlgorithmIdentifiers.ECDSA_USING_P384_CURVE_AND_SHA384, false),
     ES512(AlgorithmIdentifiers.ECDSA_USING_P521_CURVE_AND_SHA512, false),
