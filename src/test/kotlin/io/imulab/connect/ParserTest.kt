@@ -5,9 +5,7 @@ import com.nhaarman.mockitokotlin2.doAnswer
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
 import io.imulab.connect.client.*
-import io.imulab.connect.parse.DefaultValueParser
-import io.imulab.connect.parse.RequestOrUriParser
-import io.imulab.connect.parse.SimpleParameterParser
+import io.imulab.connect.parse.*
 import io.imulab.connect.spi.HttpRequest
 import io.kotlintest.matchers.collections.shouldContainExactly
 import io.kotlintest.matchers.string.shouldNotBeEmpty
@@ -28,7 +26,7 @@ class ParserTest : FeatureSpec({
             val httpRequest = mock<HttpRequest> {
                 on { method() } doReturn "GET"
                 on { header(anyOrNull()) } doReturn ""
-                on { parameter(anyOrNull()) } doAnswer { ic ->
+                onBlocking { parameter(anyOrNull()) } doAnswer { ic ->
                     when (ic.arguments[0].toString()) {
                         "client_id" -> sampleClient.id
                         "response_type" -> "code"
@@ -44,8 +42,10 @@ class ParserTest : FeatureSpec({
             val request = ConnectAuthorizeRequest()
 
             shouldNotThrowAny {
+                clientDetailsParser.parse(httpRequest, request)
                 simpleParameterParser.parse(httpRequest, request)
                 defaultValueParser.parse(httpRequest, request)
+                validatingParser.parse(httpRequest, request)
             }
             request.apply {
                 id.shouldNotBeEmpty()
@@ -68,7 +68,7 @@ class ParserTest : FeatureSpec({
             val httpRequest = mock<HttpRequest> {
                 on { method() } doReturn "GET"
                 on { header(anyOrNull()) } doReturn ""
-                on { parameter(anyOrNull()) } doAnswer { ic ->
+                onBlocking { parameter(anyOrNull()) } doAnswer { ic ->
                     when (ic.arguments[0].toString()) {
                         "client_id" -> sampleClient.id
                         "response_type" -> "code"
@@ -85,9 +85,11 @@ class ParserTest : FeatureSpec({
             val request = ConnectAuthorizeRequest()
 
             shouldNotThrowAny {
+                clientDetailsParser.parse(httpRequest, request)
                 simpleParameterParser.parse(httpRequest, request)
                 requestOrUriParser.parse(httpRequest, request)
                 defaultValueParser.parse(httpRequest, request)
+                validatingParser.parse(httpRequest, request)
             }
             request.apply {
                 id.shouldNotBeEmpty()
@@ -112,7 +114,7 @@ class ParserTest : FeatureSpec({
             val httpRequest = mock<HttpRequest> {
                 on { method() } doReturn "GET"
                 on { header(anyOrNull()) } doReturn ""
-                on { parameter(anyOrNull()) } doAnswer { ic ->
+                onBlocking { parameter(anyOrNull()) } doAnswer { ic ->
                     when (ic.arguments[0].toString()) {
                         "client_id" -> sampleClient.id
                         "grant_type" -> "authorization_code"
@@ -128,6 +130,7 @@ class ParserTest : FeatureSpec({
             shouldNotThrowAny {
                 simpleParameterParser.parse(httpRequest, request)
                 defaultValueParser.parse(httpRequest, request)
+                validatingParser.parse(httpRequest, request)
             }
             request.apply {
                 id.shouldNotBeEmpty()
@@ -166,7 +169,7 @@ class ParserTest : FeatureSpec({
             on { id } doReturn "5adb2289-b448-4994-849a-3aed1efeb211"
             on { type } doReturn ClientType.CONFIDENTIAL
             on { redirectUris } doReturn setOf("https://test.org/callback", "https://test.org/callback2")
-            on { responseTypes } doReturn setOf(ResponseType.CODE)
+            on { responseTypes } doReturn setOf(ResponseType.CODE, ResponseType.TOKEN)
             on { grantTypes } doReturn setOf(GrantType.CODE)
             on { scopes } doReturn setOf("foo", "bar", OPEN_ID)
             on { jwksCache } doReturn jwks.toJson()
@@ -216,6 +219,11 @@ class ParserTest : FeatureSpec({
             }.compactSerialization
         }
 
+        val clientDetailsParser = ClientDetailsParser(
+            clientLookup = clientLookup,
+            mergeBackHard = true
+        )
+
         val simpleParameterParser = SimpleParameterParser(
             clientLookup = clientLookup,
             jsonProvider = mock(),
@@ -234,5 +242,7 @@ class ParserTest : FeatureSpec({
         )
 
         val defaultValueParser = DefaultValueParser()
+
+        val validatingParser = ValidatingParser()
     }
 }

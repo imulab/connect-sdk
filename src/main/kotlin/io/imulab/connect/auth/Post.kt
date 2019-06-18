@@ -34,10 +34,12 @@ class ClientSecretPostAuthenticator(
             return
 
         val client = findClient(httpRequest.parameter(CLIENT_ID))
+        if (!implements().contains(client.tokenEndpointAuthMethod))
+            throw Errors.accessDenied("unsupported authentication method")
 
         compareSecret(httpRequest.parameter(CLIENT_SECRET), client)
 
-        request.mergeWith(ConnectTokenRequest(id = "", _client = client))
+        request.mergeWith(ConnectTokenRequest(id = "", client = client))
     }
 
     private suspend fun findClient(id: String): Client {
@@ -63,9 +65,8 @@ class ClientSecretPostAuthenticator(
 
     override fun implements(): List<AuthenticationMethod> = listOf(AuthenticationMethod.POST)
 
-    override fun supports(httpRequest: HttpRequest): Boolean {
+    override suspend fun supports(httpRequest: HttpRequest): Boolean {
         return httpRequest.method() == POST &&
-            httpRequest.header(CONTENT_TYPE_HEADER) == FORM_URL_ENCODED &&
             httpRequest.parameter(CLIENT_ID).isNotEmpty() &&
             httpRequest.parameter(CLIENT_SECRET).isNotEmpty()
     }

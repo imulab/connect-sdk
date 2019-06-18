@@ -1,5 +1,6 @@
 package io.imulab.connect.client
 
+import io.imulab.connect.Errors
 import org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers
 import org.jose4j.jwe.KeyManagementAlgorithmIdentifiers
 import org.jose4j.jws.AlgorithmIdentifiers
@@ -286,6 +287,12 @@ interface RequestCacheAware {
 
 enum class ClientType(val value: String) {
     PUBLIC("public"), CONFIDENTIAL("confidential");
+
+    companion object {
+        @JvmStatic
+        fun parse(value: String): ClientType = values().find { it.value == value }
+            ?: throw Errors.invalidRequest("'$value' is not a valid client type.")
+    }
 }
 
 enum class ResponseType(val value: String) {
@@ -294,7 +301,7 @@ enum class ResponseType(val value: String) {
     companion object {
         @JvmStatic
         fun parse(value: String): ResponseType = values().find { it.value == value }
-            ?: throw IllegalArgumentException("$value is not a valid response type.")
+            ?: throw Errors.invalidRequest("'$value' is not a valid response type.")
     }
 }
 
@@ -305,16 +312,28 @@ enum class GrantType(val value: String) {
     companion object {
         @JvmStatic
         fun parse(value: String): GrantType = values().find { it.value == value }
-            ?: throw IllegalArgumentException("$value is not a valid grant type.")
+            ?: throw Errors.invalidRequest("'$value' is not a valid grant type.")
     }
 }
 
 enum class ApplicationType(val value: String) {
-    WEB("web"), NATIVE("native")
+    WEB("web"), NATIVE("native");
+
+    companion object {
+        @JvmStatic
+        fun parse(value: String): ApplicationType = values().find { it.value == value }
+            ?: throw Errors.invalidRequest("'$value' is not a valid application type.")
+    }
 }
 
 enum class SubjectType(val value: String) {
-    PUBLIC("public"), PAIRWISE("pairwise")
+    PUBLIC("public"), PAIRWISE("pairwise");
+
+    companion object {
+        @JvmStatic
+        fun parse(value: String): SubjectType = values().find { it.value == value }
+            ?: throw Errors.invalidRequest("'$value' is not a valid subject type.")
+    }
 }
 
 enum class SigningAlgorithm(val value: String, val symmetric: Boolean) {
@@ -323,14 +342,20 @@ enum class SigningAlgorithm(val value: String, val symmetric: Boolean) {
     HS512(AlgorithmIdentifiers.HMAC_SHA512, true),
     RS256(AlgorithmIdentifiers.RSA_USING_SHA256, false),
     RS384(AlgorithmIdentifiers.RSA_USING_SHA384, false),
-    RS512(AlgorithmIdentifiers.RSA_USING_SHA384, false),
+    RS512(AlgorithmIdentifiers.RSA_USING_SHA512, false),
     ES256(AlgorithmIdentifiers.ECDSA_USING_P256_CURVE_AND_SHA256, false),
     ES384(AlgorithmIdentifiers.ECDSA_USING_P384_CURVE_AND_SHA384, false),
     ES512(AlgorithmIdentifiers.ECDSA_USING_P521_CURVE_AND_SHA512, false),
     PS256(AlgorithmIdentifiers.RSA_PSS_USING_SHA256, false),
     PS384(AlgorithmIdentifiers.RSA_PSS_USING_SHA384, false),
     PS512(AlgorithmIdentifiers.RSA_PSS_USING_SHA512, false),
-    NONE(AlgorithmIdentifiers.NONE, false)
+    NONE(AlgorithmIdentifiers.NONE, false);
+
+    companion object {
+        @JvmStatic
+        fun parse(value: String): SigningAlgorithm = values().find { it.value == value }
+            ?: throw Errors.invalidRequest("'$value' is not a valid signing algorithm.")
+    }
 }
 
 enum class EncryptionAlgorithm(val value: String, val symmetric: Boolean) {
@@ -351,7 +376,13 @@ enum class EncryptionAlgorithm(val value: String, val symmetric: Boolean) {
     PBES2_HS384_A192KW(KeyManagementAlgorithmIdentifiers.PBES2_HS384_A192KW, true),
     PBES2_HS512_A256KW(KeyManagementAlgorithmIdentifiers.PBES2_HS512_A256KW, true),
     DIRECT(KeyManagementAlgorithmIdentifiers.DIRECT, true),
-    NONE("none", false)
+    NONE("none", false);
+
+    companion object {
+        @JvmStatic
+        fun parse(value: String): EncryptionAlgorithm = values().find { it.value == value }
+            ?: throw Errors.invalidRequest("'$value' is not a valid encryption algorithm.")
+    }
 }
 
 enum class EncryptionEncoding(val value: String) {
@@ -361,13 +392,25 @@ enum class EncryptionEncoding(val value: String) {
     AES_128_GCM(ContentEncryptionAlgorithmIdentifiers.AES_128_GCM),
     AES_192_GCM(ContentEncryptionAlgorithmIdentifiers.AES_192_GCM),
     AES_256_GCM(ContentEncryptionAlgorithmIdentifiers.AES_256_GCM),
-    NONE("none")
+    NONE("none");
+
+    companion object {
+        @JvmStatic
+        fun parse(value: String): EncryptionEncoding = values().find { it.value == value }
+            ?: throw Errors.invalidRequest("'$value' is not a valid encryption encoding.")
+    }
 }
 
 enum class AuthenticationMethod(val value: String) {
     BASIC("client_secret_basic"), POST("client_secret_post"),
     JWT_SECRET("client_secret_jwt"), JWT_PRIVATE("private_key_jwt"),
-    NONE("none")
+    NONE("none");
+
+    companion object {
+        @JvmStatic
+        fun parse(value: String): AuthenticationMethod = values().find { it.value == value }
+            ?: throw Errors.invalidRequest("'$value' is not a valid authentication method.")
+    }
 }
 
 /**

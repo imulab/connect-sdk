@@ -3,6 +3,7 @@ package io.imulab.connect.auth
 import io.imulab.connect.Errors
 import io.imulab.connect.TokenRequest
 import io.imulab.connect.client.AuthenticationMethod
+import io.imulab.connect.client.NothingClient
 import io.imulab.connect.spi.HttpRequest
 
 const val POST = "POST"
@@ -28,7 +29,7 @@ interface Authenticator {
     /**
      * Test method to return true if the provided [httpRequest] can be authenticated by this authenticator.
      */
-    fun supports(httpRequest: HttpRequest): Boolean
+    suspend fun supports(httpRequest: HttpRequest): Boolean
 }
 
 /**
@@ -52,5 +53,4 @@ class AuthenticationHandler(
  * Utility extension to test if the client is already set. If client set, we can simply skip the current authenticator
  * even when entry condition are met.
  */
-internal fun isClientSet(request: TokenRequest): Boolean =
-    kotlin.runCatching { request.client }.getOrNull() != null
+internal fun isClientSet(request: TokenRequest): Boolean = request.client !is NothingClient

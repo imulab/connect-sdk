@@ -19,7 +19,7 @@ class RefreshTokenTest: FeatureSpec({
         scenario("token request generates refresh token") {
             val response: Response = mutableMapOf()
             val request = ConnectTokenRequest(
-                _client = AuthorizeCodeTest.client,
+                client = AuthorizeCodeTest.client,
                 session = AuthorizeCodeTest.sampleSession
             )
 
@@ -34,7 +34,7 @@ class RefreshTokenTest: FeatureSpec({
         scenario("valid refresh token") {
             val response: Response = mutableMapOf()
             val refreshToken = helper.issueToken(ConnectTokenRequest(
-                _client = client,
+                client = client,
                 session = sampleSession
             ), response).join().let { response.getRefreshToken() }
 
@@ -44,7 +44,7 @@ class RefreshTokenTest: FeatureSpec({
         scenario("invalid refresh token") {
             val response: Response = mutableMapOf()
             val refreshToken = helper.issueToken(ConnectTokenRequest(
-                _client = client,
+                client = client,
                 session = sampleSession
             ), response).join().let { response.getRefreshToken() }
 
@@ -59,7 +59,7 @@ class RefreshTokenTest: FeatureSpec({
         scenario("compute identifier of generated refresh token") {
             val response: Response = mutableMapOf()
             val refreshToken = helper.issueToken(ConnectTokenRequest(
-                _client = client,
+                client = client,
                 session = sampleSession
             ), response).join().let { response.getRefreshToken() }
 

@@ -25,6 +25,7 @@ class ClientCredentialsFlowHandler(
             mustAcceptAllScopes(request.scopes)
         }
 
+        request.session.subject = request.client.id
         request.session.grantedScopes.addAll(request.scopes)
     }
 

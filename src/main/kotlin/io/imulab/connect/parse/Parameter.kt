@@ -2,10 +2,7 @@ package io.imulab.connect.parse
 
 import io.imulab.connect.*
 import io.imulab.connect.auth.CLIENT_ID
-import io.imulab.connect.client.Client
-import io.imulab.connect.client.ClientLookup
-import io.imulab.connect.client.GrantType
-import io.imulab.connect.client.ResponseType
+import io.imulab.connect.client.*
 import io.imulab.connect.spi.HttpRequest
 import io.imulab.connect.spi.JsonProvider
 import kotlinx.coroutines.Deferred
@@ -13,11 +10,60 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 
 /**
+ * Implementation of [AuthorizeRequestParser] that parse the `client_id` and `redirect_uri` parameter ahead of
+ * everything else.
+ *
+ * The reason to separate this step is that we will gain knowledge of the client identity and the redirection uri,
+ * so if anything goes wrong after this step, we will be able to do a redirection, rather than reporting error through
+ * status 400.
+ *
+ * We are only implementing [AuthorizeRequestParser] because the advantage of this separation only pertains to the
+ * authorize request. Error reporting of the token request all go through the response body.
+ */
+class ClientDetailsParser(
+    private val clientLookup: ClientLookup,
+    private val mergeBackHard: Boolean = true
+) : AuthorizeRequestParser {
+
+    override suspend fun parse(httpRequest: HttpRequest, accumulator: AuthorizeRequest) {
+        try {
+            val wip = ConnectAuthorizeRequest(id = "")
+
+            // REQUIRED: client_id
+            if (accumulator.client is NothingClient && httpRequest.parameter(CLIENT_ID).isNotEmpty())
+                wip.client = getClient(httpRequest).await()
+
+            // OPTIONAL: redirect_uri
+            wip.redirectUri = httpRequest.parameter(REDIRECT_URI)
+
+            // Pick the redirect_uri now as later steps depend on it
+            val finalRedirectUri = wip.client.chooseRedirectUri(wip.redirectUri)
+            accumulator.session.finalRedirectUri = finalRedirectUri
+
+            // merge back
+            accumulator.mergeWith(wip, hard = mergeBackHard)
+        } catch (t: Throwable) {
+            throw Errors.invalidRequest(t.message ?: "failed to parse request.")
+        }
+    }
+
+    private suspend fun getClient(httpRequest: HttpRequest): Deferred<Client> {
+        return coroutineScope {
+            async {
+                clientLookup.findById(httpRequest.mustString(CLIENT_ID))
+            }
+        }
+    }
+}
+
+/**
  * Implementation of [AuthorizeRequestParser] and [TokenRequestParser] to parse request parameters directly from
  * the HTTP request.
  *
  * This implementation tries its best to acquire parameters. However, it tries not to raise error related to missing
  * required parameters as they could be sourced by other parsers.
+ *
+ * The only requirement is that client and its redirect_uri must be already parsed.
  *
  * Once the parameters are acquired, it will merge them back into the accumulator request, which means all non-null
  * and non-empty field will replace that of the accumulator values. This is done because, while this parser may not be
@@ -30,28 +76,26 @@ class SimpleParameterParser(
 ) : AuthorizeRequestParser, TokenRequestParser {
 
     override suspend fun parse(httpRequest: HttpRequest, accumulator: AuthorizeRequest) {
+        if (accumulator.client is NothingClient)
+            throw IllegalStateException("A previous parser should have resolved the client or reported error.")
+        else if (accumulator.session.finalRedirectUri.isEmpty())
+            throw IllegalStateException("A previous parser should have resolved redirect_uri or reported error.")
+
         try {
-            val wip = doParse(httpRequest, accumulator)
+            val wip = doParse(httpRequest)
             accumulator.mergeWith(wip, hard = mergeBackHard)
         } catch (t: Throwable) {
             throw Errors.invalidRequest(t.message ?: "failed to parse request.")
         }
     }
 
-    private suspend fun doParse(httpRequest: HttpRequest, accumulator: AuthorizeRequest): AuthorizeRequest {
+    private suspend fun doParse(httpRequest: HttpRequest): AuthorizeRequest {
         val wip = ConnectAuthorizeRequest(id = "")
-
-        // REQUIRED: client_id
-        if (tryClient(accumulator) == null && httpRequest.parameter(CLIENT_ID).isNotEmpty())
-            wip._client = getClient(httpRequest).await()
 
         // REQUIRED: response_type
         wip.responseTypes.addAll(
             httpRequest.parameter(RESPONSE_TYPE).spaceSplit().map { ResponseType.parse(it) }.toSet()
         )
-
-        // OPTIONAL: redirect_uri
-        wip.redirectUri = httpRequest.parameter(REDIRECT_URI)
 
         // OPTIONAL: scope
         wip.scopes.addAll(httpRequest.parameter(SCOPE).spaceSplit().toSet())
@@ -60,12 +104,12 @@ class SimpleParameterParser(
         wip.state = httpRequest.parameter(STATE)
 
         // OPTIONAL: response_mode, default to QUERY
-        wip._responseMode = ResponseMode.parse(
+        wip.responseMode = ResponseMode.parse(
             httpRequest.parameter(RESPONSE_MODE).withDefault(ResponseMode.QUERY.value)
         )
 
         // OPTIONAL: display, default to PAGE
-        wip._display = Display.parse(
+        wip.display = Display.parse(
             httpRequest.parameter(DISPLAY).withDefault(Display.PAGE.value)
         )
 
@@ -109,8 +153,8 @@ class SimpleParameterParser(
         val wip = ConnectTokenRequest(id = "")
 
         // REQUIRED: client_id
-        if (tryClient(accumulator) == null && httpRequest.parameter(CLIENT_ID).isNotEmpty())
-            wip._client = getClient(httpRequest).await()
+        if (accumulator.client is NothingClient && httpRequest.parameter(CLIENT_ID).isNotEmpty())
+            wip.client = getClient(httpRequest).await()
 
         // REQUIRED: redirect_uri
         wip.redirectUri = httpRequest.parameter(REDIRECT_URI)
@@ -144,12 +188,6 @@ class SimpleParameterParser(
         return jsonProvider.deserialize(raw)
     }
 }
-
-/**
- * Utility extension to test if the client is already set.
- */
-internal fun tryClient(request: Request): Client? =
-    kotlin.runCatching { request.client }.getOrNull()
 
 internal const val REFRESH_TOKEN = "refresh_token"
 internal const val CODE = "code"

@@ -1,6 +1,7 @@
 package io.imulab.connect.parse
 
 import io.imulab.connect.*
+import io.imulab.connect.client.NothingClient
 import io.imulab.connect.client.chooseRedirectUri
 import io.imulab.connect.spi.HttpRequest
 import java.time.LocalDateTime
@@ -19,16 +20,15 @@ class DefaultValueParser : AuthorizeRequestParser, TokenRequestParser {
         accumulator.mergeWith(ConnectAuthorizeRequest(
             id = UUID.randomUUID().toString(),
             requestedAt = LocalDateTime.now(),
-            _display = Display.PAGE,
-            _responseMode = ResponseMode.QUERY
+            display = Display.PAGE,
+            responseMode = ResponseMode.QUERY
         ), hard = false)
 
-        val client = tryClient(accumulator)
-        if (client != null) {
-            accumulator.session.clientId = client.id
+        if (accumulator.client !is NothingClient) {
+            accumulator.session.clientId = accumulator.client.id
             accumulator.session.savedByRequestId = accumulator.id
             accumulator.session.nonce = accumulator.nonce
-            accumulator.session.finalRedirectUri = client.chooseRedirectUri(accumulator.redirectUri)
+            accumulator.session.finalRedirectUri = accumulator.client.chooseRedirectUri(accumulator.redirectUri)
         }
     }
 
@@ -39,9 +39,8 @@ class DefaultValueParser : AuthorizeRequestParser, TokenRequestParser {
             requestedAt = LocalDateTime.now()
         ), hard = false)
 
-        val client = tryClient(accumulator)
-        if (client != null) {
-            accumulator.session.clientId = client.id
+        if (accumulator.client !is NothingClient) {
+            accumulator.session.clientId = accumulator.client.id
             accumulator.session.finalRedirectUri = accumulator.redirectUri
         }
     }

@@ -2,6 +2,7 @@ package io.imulab.connect
 
 import io.imulab.connect.client.Client
 import io.imulab.connect.client.GrantType
+import io.imulab.connect.client.NothingClient
 import io.imulab.connect.client.ResponseType
 import java.time.LocalDateTime
 import java.util.*
@@ -282,16 +283,16 @@ interface Session {
 class ConnectAuthorizeRequest(
     override var id: String = UUID.randomUUID().toString(),
     override var requestedAt: LocalDateTime = LocalDateTime.now(),
-    var _client: Client? = null,
+    override var client: Client = NothingClient(),
     override var redirectUri: String = "",
     override val scopes: MutableSet<String> = mutableSetOf(),
     override var session: Session = ConnectSession(),
-    var _rawValues: Map<String, String>? = null,
+    override var rawValues: Map<String, String> = emptyMap(),
     override val responseTypes: MutableSet<ResponseType> = mutableSetOf(),
     override var state: String = "",
-    var _responseMode: ResponseMode? = null,
+    override var responseMode: ResponseMode = ResponseMode.QUERY,
     override var nonce: String = "",
-    var _display: Display? = null,
+    override var display: Display = Display.PAGE,
     override val prompt: MutableSet<Prompt> = mutableSetOf(),
     override var maxAge: Long = 0,
     override val uiLocales: MutableList<String> = mutableListOf(),
@@ -305,16 +306,6 @@ class ConnectAuthorizeRequest(
     override var registration: String = "",
     private val _handled: MutableSet<ResponseType> = mutableSetOf()
 ) : AuthorizeRequest {
-    override val client: Client
-        get() = _client ?: notSet()
-    override val rawValues: Map<String, String>
-        get() = _rawValues ?: notSet()
-    override val responseMode: ResponseMode
-        get() = _responseMode ?: notSet()
-    override val display: Display
-        get() = _display ?: notSet()
-
-    private fun notSet(): Nothing = throw RuntimeException("value is not set")
 
     override fun markResponseTypeAsHandled(responseType: ResponseType) {
         _handled.add(responseType)
@@ -323,33 +314,9 @@ class ConnectAuthorizeRequest(
     override fun isResponseTypeHandled(responseType: ResponseType): Boolean =
         _handled.contains(responseType)
 
-    private fun AuthorizeRequest.tryClient(): Client? = try {
-        this.client
-    } catch (t: Throwable) {
-        null
-    }
-
-    private fun AuthorizeRequest.tryRawValues(): Map<String, String>? = try {
-        this.rawValues
-    } catch (t: Throwable) {
-        null
-    }
-
-    private fun AuthorizeRequest.tryResponseMode(): ResponseMode? = try {
-        this.responseMode
-    } catch (t: Throwable) {
-        null
-    }
-
-    private fun AuthorizeRequest.tryDisplay(): Display? = try {
-        this.display
-    } catch (t: Throwable) {
-        null
-    }
-
     override fun mergeWith(other: AuthorizeRequest, hard: Boolean) {
-        if ((hard && other.tryClient() != null) || this._client == null)
-            this._client = other.tryClient()
+        if ((hard && other.client !is NothingClient) || this.client is NothingClient)
+            this.client = other.client
 
         if ((hard && other.redirectUri.isNotEmpty()) || this.redirectUri.isEmpty())
             this.redirectUri = other.redirectUri
@@ -359,8 +326,8 @@ class ConnectAuthorizeRequest(
             this.scopes.addAll(other.scopes)
         }
 
-        if ((hard && other.tryRawValues() != null) || this._rawValues == null)
-            this._rawValues = other.tryRawValues()
+        if ((hard && other.rawValues.isNotEmpty()) || this.rawValues.isEmpty())
+            this.rawValues = other.rawValues
 
         if ((hard && other.responseTypes.isNotEmpty()) || this.responseTypes.isEmpty()) {
             this.responseTypes.clear()
@@ -370,14 +337,14 @@ class ConnectAuthorizeRequest(
         if ((hard && other.state.isNotEmpty()) || this.state.isEmpty())
             this.state = other.state
 
-        if ((hard && other.tryResponseMode() != null) || this._responseMode == null)
-            this._responseMode = other.tryResponseMode()
+        if ((hard && other.responseMode != ResponseMode.QUERY) || this.responseMode == ResponseMode.QUERY)
+            this.responseMode = other.responseMode
 
         if ((hard && other.nonce.isNotEmpty()) || this.nonce.isEmpty())
             this.nonce = other.nonce
 
-        if ((hard && other.tryDisplay() != null) || this._display == null)
-            this._display = other.tryDisplay()
+        if ((hard && other.display != Display.PAGE) || this.display == Display.PAGE)
+            this.display = other.display
 
         if ((hard && other.prompt.isNotEmpty()) || this.prompt.isEmpty()) {
             this.prompt.clear()
@@ -430,8 +397,8 @@ class ConnectAuthorizeRequest(
  */
 val DefaultAuthorizeRequestValues = ConnectAuthorizeRequest(
     id = "",
-    _responseMode = ResponseMode.QUERY,
-    _display = Display.PAGE
+    responseMode = ResponseMode.QUERY,
+    display = Display.PAGE
 )
 
 /**
@@ -440,37 +407,19 @@ val DefaultAuthorizeRequestValues = ConnectAuthorizeRequest(
 class ConnectTokenRequest(
     override var id: String = UUID.randomUUID().toString(),
     override var requestedAt: LocalDateTime = LocalDateTime.now(),
-    var _client: Client? = null,
+    override var client: Client = NothingClient(),
     override var redirectUri: String = "",
     override val scopes: MutableSet<String> = mutableSetOf(),
     override var session: Session = ConnectSession(),
-    var _rawValues: Map<String, String>? = null,
+    override var rawValues: Map<String, String> = emptyMap(),
     override val grantTypes: MutableSet<GrantType> = mutableSetOf(),
     override var code: String = "",
     override var refreshToken: String = ""
 ): TokenRequest {
-    override val client: Client
-        get() = _client ?: notSet()
-    override val rawValues: Map<String, String>
-        get() = _rawValues ?: notSet()
-
-    private fun notSet(): Nothing = throw RuntimeException("value is not set")
-
-    private fun TokenRequest.tryClient(): Client? = try {
-        this.client
-    } catch (t: Throwable) {
-        null
-    }
-
-    private fun TokenRequest.tryRawValues(): Map<String, String>? = try {
-        this.rawValues
-    } catch (t: Throwable) {
-        null
-    }
 
     override fun mergeWith(other: TokenRequest, hard: Boolean) {
-        if ((hard && other.tryClient() != null) || this._client == null)
-            this._client = other.tryClient()
+        if ((hard && other.client !is NothingClient) || this.client is NothingClient)
+            this.client = other.client
 
         if ((hard && other.redirectUri.isNotEmpty()) || this.redirectUri.isEmpty())
             this.redirectUri = other.redirectUri
@@ -480,8 +429,8 @@ class ConnectTokenRequest(
             this.scopes.addAll(other.scopes)
         }
 
-        if ((hard && other.tryRawValues() != null) || this._rawValues == null)
-            this._rawValues = other.tryRawValues()
+        if ((hard && other.rawValues.isNotEmpty()) || this.rawValues.isEmpty())
+            this.rawValues = other.rawValues
 
         if ((hard && other.grantTypes.isNotEmpty()) || this.grantTypes.isEmpty()) {
             this.grantTypes.clear()
@@ -558,7 +507,7 @@ enum class ResponseMode(val value: String) {
     companion object {
         @JvmStatic
         fun parse(value: String): ResponseMode = values().find { it.value == value }
-            ?: throw IllegalArgumentException("$value is not a valid response mode.")
+            ?: throw Errors.invalidRequest("'$value' is not a valid response mode.")
     }
 }
 
@@ -568,7 +517,7 @@ enum class Display(val value: String) {
     companion object {
         @JvmStatic
         fun parse(value: String): Display = values().find { it.value == value }
-            ?: throw IllegalArgumentException("$value is not a valid display.")
+            ?: throw Errors.invalidRequest("'$value' is not a valid display.")
     }
 }
 
@@ -578,6 +527,6 @@ enum class Prompt(val value: String) {
     companion object {
         @JvmStatic
         fun parse(value: String): Prompt = values().find { it.value == value }
-            ?: throw IllegalArgumentException("$value is not a valid prompt.")
+            ?: throw Errors.invalidRequest("'$value' is not a valid prompt.")
     }
 }

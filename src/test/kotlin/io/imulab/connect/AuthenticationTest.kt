@@ -7,8 +7,8 @@ import com.nhaarman.mockitokotlin2.mock
 import io.imulab.connect.auth.*
 import io.imulab.connect.client.*
 import io.imulab.connect.spi.HttpRequest
-import io.kotlintest.shouldBe
-import io.kotlintest.shouldNotBe
+import io.kotlintest.matchers.types.shouldBeTypeOf
+import io.kotlintest.matchers.types.shouldNotBeTypeOf
 import io.kotlintest.shouldThrowExactly
 import io.kotlintest.specs.FeatureSpec
 import org.jose4j.jwk.JsonWebKeySet
@@ -35,13 +35,13 @@ class AuthenticationTest : FeatureSpec({
                         else -> ""
                     }
                 }
-                on { parameter(anyOrNull()) } doReturn ""
+                onBlocking { parameter(anyOrNull()) } doReturn ""
             }
             val req = ConnectTokenRequest()
 
             authHandler.authenticate(httpRequest, req)
 
-            req._client shouldNotBe null
+            req.client.shouldNotBeTypeOf<NothingClient>()
         }
 
         scenario("incorrect credentials shall be rejected") {
@@ -57,14 +57,14 @@ class AuthenticationTest : FeatureSpec({
                         else -> ""
                     }
                 }
-                on { parameter(anyOrNull()) } doReturn ""
+                onBlocking { parameter(anyOrNull()) } doReturn ""
             }
             val req = ConnectTokenRequest()
 
             shouldThrowExactly<ConnectException> {
                 authHandler.authenticate(httpRequest, req)
             }
-            req._client shouldBe null
+            req.client.shouldBeTypeOf<NothingClient>()
         }
     }
 
@@ -78,7 +78,7 @@ class AuthenticationTest : FeatureSpec({
                         else -> ""
                     }
                 }
-                on { parameter(anyOrNull()) } doAnswer { ic ->
+                onBlocking { parameter(anyOrNull()) } doAnswer { ic ->
                     when (ic.arguments[0].toString()) {
                         "client_id" -> postClient.id
                         "client_secret" -> postClient.secret
@@ -90,7 +90,7 @@ class AuthenticationTest : FeatureSpec({
 
             authHandler.authenticate(httpRequest, req)
 
-            req._client shouldNotBe null
+            req.client.shouldNotBeTypeOf<NothingClient>()
         }
 
         scenario("incorrect credentials shall be rejected") {
@@ -102,7 +102,7 @@ class AuthenticationTest : FeatureSpec({
                         else -> ""
                     }
                 }
-                on { parameter(anyOrNull()) } doAnswer { ic ->
+                onBlocking { parameter(anyOrNull()) } doAnswer { ic ->
                     when (ic.arguments[0].toString()) {
                         "client_id" -> postClient.id
                         "client_secret" -> "foobar"
@@ -115,7 +115,7 @@ class AuthenticationTest : FeatureSpec({
             shouldThrowExactly<ConnectException> {
                 authHandler.authenticate(httpRequest, req)
             }
-            req._client shouldBe null
+            req.client.shouldBeTypeOf<NothingClient>()
         }
     }
 
@@ -142,7 +142,7 @@ class AuthenticationTest : FeatureSpec({
                         else -> ""
                     }
                 }
-                on { parameter(anyOrNull()) } doAnswer { ic ->
+                onBlocking { parameter(anyOrNull()) } doAnswer { ic ->
                     when (ic.arguments[0].toString()) {
                         "client_id" -> clientSecretJwtClient.id
                         "client_assertion" -> assertion
@@ -155,7 +155,7 @@ class AuthenticationTest : FeatureSpec({
 
             authHandler.authenticate(httpRequest, req)
 
-            req._client shouldNotBe null
+            req.client.shouldNotBeTypeOf<NothingClient>()
         }
 
         scenario("incorrect credentials shall be rejected") {
@@ -180,7 +180,7 @@ class AuthenticationTest : FeatureSpec({
                         else -> ""
                     }
                 }
-                on { parameter(anyOrNull()) } doAnswer { ic ->
+                onBlocking { parameter(anyOrNull()) } doAnswer { ic ->
                     when (ic.arguments[0].toString()) {
                         "client_id" -> clientSecretJwtClient.id
                         "client_assertion" -> assertion
@@ -194,7 +194,7 @@ class AuthenticationTest : FeatureSpec({
             shouldThrowExactly<ConnectException> {
                 authHandler.authenticate(httpRequest, req)
             }
-            req._client shouldBe null
+            req.client.shouldBeTypeOf<NothingClient>()
         }
     }
 
@@ -222,7 +222,7 @@ class AuthenticationTest : FeatureSpec({
                         else -> ""
                     }
                 }
-                on { parameter(anyOrNull()) } doAnswer { ic ->
+                onBlocking { parameter(anyOrNull()) } doAnswer { ic ->
                     when (ic.arguments[0].toString()) {
                         "client_id" -> privateKeyJwtClient.id
                         "client_assertion" -> assertion
@@ -235,7 +235,7 @@ class AuthenticationTest : FeatureSpec({
 
             authHandler.authenticate(httpRequest, req)
 
-            req._client shouldNotBe null
+            req.client.shouldNotBeTypeOf<NothingClient>()
         }
 
         scenario("incorrect credentials shall be rejected") {
@@ -266,7 +266,7 @@ class AuthenticationTest : FeatureSpec({
                         else -> ""
                     }
                 }
-                on { parameter(anyOrNull()) } doAnswer { ic ->
+                onBlocking { parameter(anyOrNull()) } doAnswer { ic ->
                     when (ic.arguments[0].toString()) {
                         "client_id" -> privateKeyJwtClient.id
                         "client_assertion" -> assertion
@@ -280,7 +280,7 @@ class AuthenticationTest : FeatureSpec({
             shouldThrowExactly<ConnectException> {
                 authHandler.authenticate(httpRequest, req)
             }
-            req._client shouldBe null
+            req.client.shouldBeTypeOf<NothingClient>()
         }
     }
 

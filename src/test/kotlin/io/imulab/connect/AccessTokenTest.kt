@@ -50,7 +50,7 @@ class AccessTokenTest : FeatureSpec({
             }
 
             asymmetricStrategy.validateToken(oldToken, ConnectTokenRequest(
-                _client = client
+                client = client
             ))
         }
 
@@ -61,7 +61,7 @@ class AccessTokenTest : FeatureSpec({
             }
 
             symmetricStrategy.validateToken(oldToken, ConnectTokenRequest(
-                _client = client
+                client = client
             ))
         }
 
@@ -79,7 +79,7 @@ class AccessTokenTest : FeatureSpec({
 
             shouldThrowAny {
                 symmetricStrategy.validateToken(oldToken, ConnectTokenRequest(
-                    _client = client
+                    client = client
                 ))
             }
         }
@@ -145,7 +145,7 @@ class AccessTokenTest : FeatureSpec({
         )
 
         fun sampleRequest(): ConnectTokenRequest = ConnectTokenRequest(
-            _client = client,
+            client = client,
             session = ConnectSession(
                 subject = "test user",
                 obfuscatedSubject = "test user",

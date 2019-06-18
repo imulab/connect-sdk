@@ -6,7 +6,7 @@ import io.imulab.connect.spi.HttpRequest
 /**
  * Utility method to force existence check on a parameter.
  */
-fun HttpRequest.mustString(name: String): String {
+suspend fun HttpRequest.mustString(name: String): String {
     val v = this.parameter(name)
     if (v.isEmpty())
         throw Errors.invalidRequest("$name is required")

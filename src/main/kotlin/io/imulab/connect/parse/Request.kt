@@ -81,9 +81,9 @@ class RequestOrUriParser(
          * Explicitly check client id before merging, to avoid attacks where malicious party
          * authenticate with one client but replaces it through the use of request parameter.
          */
-        if (tryClient(wip) != null && tryClient(accumulator) != null) {
-            val wipClientId = tryClient(wip)!!.id
-            val accClientId = tryClient(accumulator)!!.id
+        if (wip.client !is NothingClient && accumulator.client !is NothingClient) {
+            val wipClientId = wip.client.id
+            val accClientId = accumulator.client.id
             if (wipClientId != accClientId)
                 throw Errors.invalidRequest("client_id in request parameter mismatch")
         }
@@ -109,9 +109,9 @@ class RequestOrUriParser(
 
         wip.state = claims.getState()
 
-        wip._responseMode = claims.getResponseMode()
+        wip.responseMode = claims.getResponseMode() ?: ResponseMode.QUERY
 
-        wip._display = claims.getDisplay()
+        wip.display = claims.getDisplay() ?: Display.PAGE
 
         wip.prompt.addAll(claims.getPrompts())
 
@@ -136,17 +136,21 @@ class RequestOrUriParser(
         )
 
         // if client_id, wait for client result and set it
-        getClientAsync?.await().apply { wip._client = this }
+        getClientAsync?.await().apply { wip.client = this ?: NothingClient() }
 
         return wip
     }
 
     private suspend fun resolveClient(httpRequest: HttpRequest, accumulator: AuthorizeRequest): Client {
-        return tryClient(accumulator) ?: coroutineScope {
-            async(Dispatchers.IO) {
-                clientLookup.findById(httpRequest.parameter(CLIENT_ID))
-            }
-        }.await()
+        return if (accumulator.client is NothingClient) {
+            coroutineScope {
+                async(Dispatchers.IO) {
+                    clientLookup.findById(httpRequest.parameter(CLIENT_ID))
+                }
+            }.await()
+        } else {
+            accumulator.client
+        }
     }
 
     private suspend fun resolveRequest(httpRequest: HttpRequest, client: Client): String {

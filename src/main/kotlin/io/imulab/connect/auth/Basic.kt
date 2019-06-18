@@ -40,10 +40,12 @@ class ClientSecretBasicAuthenticator(
 
         val parts = decodeHeader(httpRequest)
         val client = findClient(parts[0])
+        if (!implements().contains(client.tokenEndpointAuthMethod))
+            throw Errors.accessDenied("unsupported authentication method")
 
         compareSecret(parts[1], client)
 
-        request.mergeWith(ConnectTokenRequest(id = "", _client = client))
+        request.mergeWith(ConnectTokenRequest(id = "", client = client))
     }
 
     private fun decodeHeader(httpRequest: HttpRequest): List<String> {
@@ -83,6 +85,6 @@ class ClientSecretBasicAuthenticator(
 
     override fun implements(): List<AuthenticationMethod> = listOf(AuthenticationMethod.BASIC)
 
-    override fun supports(httpRequest: HttpRequest): Boolean =
+    override suspend fun supports(httpRequest: HttpRequest): Boolean =
         httpRequest.header(AUTH_HEADER).startsWith(BASIC + SPACE)
 }

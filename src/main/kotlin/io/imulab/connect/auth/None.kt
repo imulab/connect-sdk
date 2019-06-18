@@ -39,12 +39,12 @@ class NoneAuthenticator(
                 throw Errors.clientForbidden("client is not registered to use JWT based authentication")
         }
 
-        request.mergeWith(ConnectTokenRequest(id = "", _client = client))
+        request.mergeWith(ConnectTokenRequest(id = "", client = client))
     }
 
     override fun implements(): List<AuthenticationMethod> = listOf(AuthenticationMethod.NONE)
 
     // we do not support chained authentication in this case
     // have to explicitly call this authenticator.
-    override fun supports(httpRequest: HttpRequest): Boolean = false
+    override suspend fun supports(httpRequest: HttpRequest): Boolean = false
 }

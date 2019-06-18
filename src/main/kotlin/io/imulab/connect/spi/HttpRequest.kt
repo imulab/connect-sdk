@@ -19,5 +19,5 @@ interface HttpRequest {
      * Returns the parameter value for the given [key]. Parameter can be source from either query when [method] is
      * `GET`, or from body form when [method] is `POST`. If a parameter does not exist, return an empty string.
      */
-    fun parameter(key: String): String
+    suspend fun parameter(key: String): String
 }
